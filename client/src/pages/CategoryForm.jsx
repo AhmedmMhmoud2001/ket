@@ -14,12 +14,12 @@ const CategoryForm = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({
-        name: '',
-        name_ar: '',
-        icon: '',
-        sort_order: 0,
-        is_active: true,
-        image_url: ''
+        nameEn: '',
+        nameAr: '',
+        type: 'RESTAURANT',
+        sortOrder: 0,
+        isActive: true,
+        imageUrl: ''
     });
 
     const [imageFile, setImageFile] = useState(null);
@@ -33,35 +33,41 @@ const CategoryForm = () => {
 
     const fetchCategory = async () => {
         try {
+            setLoading(true);
             const response = await api.get(`/categories/${id}`);
             const data = response.data.data;
             setFormData({
-                name: data.name || '',
-                name_ar: data.nameAr || data.name_ar || '',
-                icon: data.icon || '',
-                sort_order: data.sortOrder || data.sort_order || 0,
-                is_active: data.isActive !== undefined ? data.isActive : data.is_active !== undefined ? data.is_active : true,
-                image_url: data.image || data.image_url || ''
+                nameEn: data.nameEn || data.name || '',
+                nameAr: data.nameAr || data.name_ar || '',
+                type: data.type || 'RESTAURANT',
+                sortOrder: data.sortOrder || data.sort_order || 0,
+                isActive: data.isActive !== undefined ? data.isActive : (data.is_active !== undefined ? data.is_active : true),
+                imageUrl: data.imageUrl || data.image || data.image_url || ''
             });
 
-            // Set preview from existing image
-            if (data.image || data.image_url) {
-                const imageUrl = (data.image || data.image_url);
+            if (data.imageUrl || data.image || data.image_url) {
+                const img = data.imageUrl || data.image || data.image_url;
                 setImagePreview(
-                    imageUrl.startsWith('http') 
-                        ? imageUrl 
-                        : `http://localhost:5000${imageUrl}`
+                    img.startsWith('http')
+                        ? img
+                        : `${import.meta.env.VITE_API_URL}${img}`
                 );
             }
         } catch (error) {
+            console.error('Error fetching category:', error);
             toast.error('Error fetching category details');
             navigate('/categories');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleChange = (e) => {
-        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        setFormData({ ...formData, [e.target.name]: value });
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
     const handleImageChange = (e) => {
@@ -79,13 +85,11 @@ const CategoryForm = () => {
     const removeImage = () => {
         setImageFile(null);
         setImagePreview(null);
-        setFormData({ ...formData, image_url: '' });
+        setFormData(prev => ({ ...prev, imageUrl: '' }));
     };
 
     const uploadImage = async () => {
-        if (!imageFile) {
-            return formData.image_url;
-        }
+        if (!imageFile) return formData.imageUrl;
 
         setUploading(true);
         try {
@@ -93,16 +97,14 @@ const CategoryForm = () => {
             uploadFormData.append('category_image', imageFile);
 
             const response = await api.post('/upload/category', uploadFormData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             return response.data.data.image;
         } catch (error) {
             console.error('Upload error:', error);
             toast.error('Error uploading image');
-            throw error;
+            return formData.imageUrl;
         } finally {
             setUploading(false);
         }
@@ -113,12 +115,11 @@ const CategoryForm = () => {
         setLoading(true);
 
         try {
-            // Upload image first if new image selected
-            const imageUrl = await uploadImage();
+            const finalImageUrl = await uploadImage();
 
             const submitData = {
                 ...formData,
-                image_url: imageUrl || formData.image_url
+                imageUrl: finalImageUrl
             };
 
             if (isEdit) {
@@ -130,15 +131,23 @@ const CategoryForm = () => {
             }
             navigate('/categories');
         } catch (error) {
-            console.error(error);
+            console.error('Submit error:', error);
             toast.error(error.response?.data?.message || 'Something went wrong');
         } finally {
             setLoading(false);
         }
     };
 
+    if (loading && isEdit) {
+        return (
+            <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto pb-12">
             {/* Header */}
             <div className="mb-6">
                 <button
@@ -160,16 +169,16 @@ const CategoryForm = () => {
                 {/* Image Upload */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Category Image</h2>
-                    
+
                     <div className="flex justify-center">
                         <div className="w-full max-w-md">
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition-colors">
                                 <div className="space-y-2 text-center w-full">
                                     {imagePreview ? (
                                         <div className="relative inline-block">
-                                            <img 
-                                                src={imagePreview} 
-                                                alt="Category preview" 
+                                            <img
+                                                src={imagePreview}
+                                                alt="Category preview"
                                                 className="mx-auto h-48 w-48 object-cover rounded-xl shadow-lg"
                                             />
                                             <button
@@ -195,7 +204,6 @@ const CategoryForm = () => {
                                                 </label>
                                             </div>
                                             <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                                            <p className="text-xs text-gray-400">Will be optimized to 300x300 WebP</p>
                                         </>
                                     )}
                                 </div>
@@ -207,7 +215,7 @@ const CategoryForm = () => {
                 {/* Basic Information */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -215,10 +223,10 @@ const CategoryForm = () => {
                             </label>
                             <input
                                 type="text"
-                                name="name"
+                                name="nameEn"
                                 required
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                value={formData.name}
+                                className="input"
+                                value={formData.nameEn}
                                 onChange={handleChange}
                                 placeholder="e.g., Fast Food"
                             />
@@ -226,13 +234,14 @@ const CategoryForm = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Category Name (Arabic)
+                                Category Name (Arabic) <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
-                                name="name_ar"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                value={formData.name_ar}
+                                name="nameAr"
+                                required
+                                className="input"
+                                value={formData.nameAr}
                                 onChange={handleChange}
                                 placeholder="مثال: وجبات سريعة"
                                 dir="rtl"
@@ -241,18 +250,19 @@ const CategoryForm = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Icon/Emoji
+                                Category Type <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                type="text"
-                                name="icon"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-2xl text-center"
-                                value={formData.icon}
+                            <select
+                                name="type"
+                                required
+                                className="input"
+                                value={formData.type}
                                 onChange={handleChange}
-                                placeholder="🍔"
-                                maxLength="2"
-                            />
-                            <p className="text-xs text-gray-500 mt-1 text-center">Add emoji icon</p>
+                            >
+                                <option value="RESTAURANT">Restaurant</option>
+                                <option value="SHOP">Shop</option>
+                                <option value="SERVICE">Service</option>
+                            </select>
                         </div>
 
                         <div>
@@ -261,37 +271,35 @@ const CategoryForm = () => {
                             </label>
                             <input
                                 type="number"
-                                name="sort_order"
+                                name="sortOrder"
                                 min="0"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                value={formData.sort_order}
+                                className="input"
+                                value={formData.sortOrder}
                                 onChange={handleChange}
                                 placeholder="0"
                             />
-                            <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
                         </div>
 
                         <div className="md:col-span-2">
                             <div className="flex items-center">
                                 <input
                                     type="checkbox"
-                                    id="is_active"
-                                    name="is_active"
+                                    id="isActive"
+                                    name="isActive"
                                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                    checked={formData.is_active}
+                                    checked={formData.isActive}
                                     onChange={handleChange}
                                 />
-                                <label htmlFor="is_active" className="ml-3 block text-sm font-medium text-gray-900">
+                                <label htmlFor="isActive" className="ml-3 block text-sm font-medium text-gray-900">
                                     Active Category
                                 </label>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1 ml-7">Active categories are visible to customers</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex items-center justify-end space-x-4 space-x-reverse">
+                <div className="flex items-center justify-end space-x-4">
                     <button
                         type="button"
                         onClick={() => navigate('/categories')}
@@ -302,21 +310,9 @@ const CategoryForm = () => {
                     <button
                         type="submit"
                         disabled={loading || uploading}
-                        className="px-8 py-2.5 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
+                        className="btn-primary px-8"
                     >
-                        {uploading ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Uploading Image...
-                            </>
-                        ) : loading ? (
-                            'Saving...'
-                        ) : (
-                            isEdit ? 'Update Category' : 'Create Category'
-                        )}
+                        {uploading ? 'Uploading Image...' : loading ? 'Saving...' : (isEdit ? 'Update Category' : 'Create Category')}
                     </button>
                 </div>
             </form>
@@ -325,4 +321,3 @@ const CategoryForm = () => {
 };
 
 export default CategoryForm;
-

@@ -20,7 +20,7 @@ router.use(protect);
 // Upload restaurant images (logo and banner)
 // Processed by Sharp: Logo (400x400), Banner (1200x400), WebP format
 router.post('/restaurant',
-    authorize('SUPER_ADMIN', 'RESTAURANT_MANAGER'),
+    authorize('ADMIN', 'RESTAURANT_OWNER'),
     ...uploadRestaurantImages,
     handleUploadError,
     (req, res) => {
@@ -53,7 +53,7 @@ router.post('/restaurant',
 // Upload multiple product images
 // Processed by Sharp: 800x800, WebP format
 router.post('/product/multiple',
-    authorize('SUPER_ADMIN', 'RESTAURANT_MANAGER'),
+    authorize('ADMIN', 'RESTAURANT_OWNER'),
     ...uploadProductImages,
     handleUploadError,
     (req, res) => {
@@ -86,7 +86,7 @@ router.post('/product/multiple',
 // Upload single product image
 // Processed by Sharp: 800x800, WebP format
 router.post('/product',
-    authorize('SUPER_ADMIN', 'RESTAURANT_MANAGER'),
+    authorize('ADMIN', 'RESTAURANT_OWNER'),
     ...uploadProductImage,
     handleUploadError,
     (req, res) => {
@@ -119,7 +119,7 @@ router.post('/product',
 // Upload category image
 // Processed by Sharp: 300x300, WebP format
 router.post('/category',
-    authorize('SUPER_ADMIN'),
+    authorize('ADMIN'),
     ...uploadCategoryImage,
     handleUploadError,
     (req, res) => {
@@ -152,7 +152,7 @@ router.post('/category',
 // Upload driver image
 // Processed by Sharp: 400x400, WebP format
 router.post('/driver',
-    authorize('SUPER_ADMIN'),
+    authorize('ADMIN'),
     ...uploadDriverImage,
     handleUploadError,
     (req, res) => {
@@ -185,7 +185,7 @@ router.post('/driver',
 // Upload user avatar
 // Processed by Sharp: 200x200, WebP format
 router.post('/user/avatar',
-    authorize('SUPER_ADMIN', 'RESTAURANT_MANAGER', 'SUPPORT_AGENT', 'ANALYST'),
+    authorize('ADMIN', 'RESTAURANT_OWNER', 'SUPPORT_AGENT', 'ANALYST'),
     ...uploadUserAvatar,
     handleUploadError,
     (req, res) => {
@@ -218,7 +218,7 @@ router.post('/user/avatar',
 // Upload offer image
 // Processed by Sharp: 1200x600, WebP format
 router.post('/offer',
-    authorize('SUPER_ADMIN'),
+    authorize('ADMIN'),
     ...uploadOfferImage,
     handleUploadError,
     (req, res) => {

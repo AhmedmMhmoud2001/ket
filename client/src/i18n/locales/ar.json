@@ -14,7 +14,6 @@
     "reviews": "التقييمات",
     "support": "الدعم",
     "splashScreens": "شاشات البداية",
-    "onboarding": "التعريف",
     "settings": "الإعدادات",
     "logs": "السجلات",
     "profile": "الملف الشخصي",
@@ -123,10 +122,14 @@
   },
   "restaurants": {
     "title": "المطاعم",
+    "description": "إدارة جميع المطاعم",
+    "add": "إضافة مطعم جديد",
+    "edit": "تعديل مطعم",
     "addRestaurant": "إضافة مطعم",
     "editRestaurant": "تعديل مطعم",
     "restaurantDetails": "تفاصيل المطعم",
-    "noRestaurants": "لا توجد مطاعم"
+    "noRestaurants": "لا توجد مطاعم",
+    "logo": "شعار المطعم"
   },
   "products": {
     "title": "المنتجات",
@@ -279,4 +282,3 @@
     "allStatuses": "جميع الحالات"
   }
 }
-

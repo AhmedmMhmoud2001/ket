@@ -55,21 +55,25 @@ exports.getAllCategories = async (req, res) => {
 // Create category
 exports.createCategory = async (req, res) => {
     try {
-        const { nameAr, nameEn, type, isActive } = req.body;
+        const { nameAr, nameEn, name, type, isActive, is_active, image_url, imageUrl } = req.body;
+        const finalNameEn = nameEn || name;
+        const finalIsActive = isActive !== undefined ? isActive : (is_active !== undefined ? is_active : true);
+        const finalImageUrl = imageUrl || image_url;
 
-        if (!nameAr || !nameEn || !type) {
+        if (!nameAr || !finalNameEn || !type) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide nameAr, nameEn and type'
+                message: 'Please provide nameAr, nameEn (or name) and type'
             });
         }
 
         const category = await prisma.category.create({
             data: {
                 nameAr,
-                nameEn,
+                nameEn: finalNameEn,
                 type: type.toUpperCase(),
-                isActive: isActive !== undefined ? isActive : true
+                isActive: finalIsActive,
+                imageUrl: finalImageUrl || null
             }
         });
 
@@ -118,13 +122,20 @@ exports.getCategoryById = async (req, res) => {
 exports.updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nameAr, nameEn, type, isActive } = req.body;
+        const { nameAr, nameEn, name, type, isActive, is_active, imageUrl, image_url } = req.body;
 
         const updateData = {};
         if (nameAr !== undefined) updateData.nameAr = nameAr;
         if (nameEn !== undefined) updateData.nameEn = nameEn;
+        else if (name !== undefined) updateData.nameEn = name;
+
         if (type !== undefined) updateData.type = type.toUpperCase();
+
         if (isActive !== undefined) updateData.isActive = isActive;
+        else if (is_active !== undefined) updateData.isActive = is_active;
+
+        if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+        else if (image_url !== undefined) updateData.imageUrl = image_url;
 
         const category = await prisma.category.update({
             where: { id },

@@ -111,7 +111,8 @@ exports.createRestaurant = async (req, res) => {
             deliveryType,
             categoryId,
             ownerId,
-            adminId
+            adminId,
+            imageUrl
         } = req.body;
 
         if (!nameAr || !nameEn || !phone || !categoryId || !ownerId) {
@@ -132,6 +133,7 @@ exports.createRestaurant = async (req, res) => {
                 categoryId,
                 ownerId,
                 adminId: adminId || null,
+                imageUrl: imageUrl || null,
                 isActive: true
             }
         });
@@ -166,7 +168,9 @@ exports.updateRestaurant = async (req, res) => {
         if (updateData.deliveryType) mappedData.deliveryType = updateData.deliveryType;
         if (updateData.categoryId) mappedData.categoryId = updateData.categoryId;
         if (updateData.isActive !== undefined) mappedData.isActive = updateData.isActive;
-        if (updateData.adminId) mappedData.adminId = updateData.adminId;
+        if (updateData.adminId !== undefined) mappedData.adminId = updateData.adminId ? updateData.adminId : null;
+        if (updateData.imageUrl !== undefined) mappedData.imageUrl = updateData.imageUrl;
+        if (updateData.ownerId) mappedData.ownerId = updateData.ownerId;
 
         const restaurant = await prisma.restaurant.update({
             where: { id },
