@@ -1,0 +1,1808 @@
+{
+  "info": {
+    "name": "Tak Food Delivery API",
+    "description": "Complete API collection for Tak Food Delivery System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('auth_token', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+1234567890\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"oldpassword\",\n  \"newPassword\": \"newpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/customers?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["users", "customers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/customers",
+              "host": ["{{base_url}}"],
+              "path": ["users", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants",
+      "item": [
+        {
+          "name": "Get All Restaurants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/restaurants?is_active=true&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants"],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Restaurant By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/restaurants/:id",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "restaurant-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Restaurant",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Restaurant Name\",\n  \"nameAr\": \"اسم المطعم\",\n  \"description\": \"Description\",\n  \"descriptionAr\": \"الوصف\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"restaurant@example.com\",\n  \"address\": \"Address\",\n  \"latitude\": 25.1234,\n  \"longitude\": 45.6789,\n  \"deliveryFee\": 10,\n  \"deliveryRadius\": 5,\n  \"isActive\": true,\n  \"categoryIds\": [\"category-id-1\", \"category-id-2\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/restaurants",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants"]
+            }
+          }
+        },
+        {
+          "name": "Update Restaurant",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Restaurant Name\",\n  \"nameAr\": \"اسم المطعم المحدث\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/restaurants/:id",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "restaurant-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Restaurant",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/restaurants/:id",
+              "host": ["{{base_url}}"],
+              "path": ["restaurants", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "restaurant-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?restaurant_id=xxx&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "restaurant_id",
+                  "value": "xxx"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Product Name\",\n  \"nameAr\": \"اسم المنتج\",\n  \"description\": \"Description\",\n  \"descriptionAr\": \"الوصف\",\n  \"price\": 25.99,\n  \"restaurantId\": \"restaurant-id\",\n  \"categoryId\": \"category-id\",\n  \"subcategoryId\": \"subcategory-id\",\n  \"images\": [\"url1\", \"url2\"],\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product Name\",\n  \"price\": 29.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?status=PENDING&payment_status=PAID&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "payment_status",
+                  "value": "PAID"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/stats",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Payment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_status\": \"PAID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/:id/payment-status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "payment-status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign Driver",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driver_id\": \"driver-id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/:id/assign-driver",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "assign-driver"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/:id/tracking",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "tracking"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Category Name\",\n  \"nameAr\": \"اسم الفئة\",\n  \"image\": \"image-url\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"nameAr\": \"اسم الفئة المحدث\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Category",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id", "toggle"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subcategories",
+      "item": [
+        {
+          "name": "Get All Subcategories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subcategories?category_id=xxx",
+              "host": ["{{base_url}}"],
+              "path": ["subcategories"],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "xxx"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Subcategory",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Subcategory Name\",\n  \"nameAr\": \"اسم الفئة الفرعية\",\n  \"categoryId\": \"category-id\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/subcategories",
+              "host": ["{{base_url}}"],
+              "path": ["subcategories"]
+            }
+          }
+        },
+        {
+          "name": "Update Subcategory",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Subcategory Name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/subcategories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["subcategories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subcategory-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Subcategory",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subcategories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["subcategories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subcategory-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Offers",
+      "item": [
+        {
+          "name": "Get All Offers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offers?search=xxx&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["offers"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "xxx"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Offer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Offer Title\",\n  \"title_ar\": \"عنوان العرض\",\n  \"description\": \"Description\",\n  \"image_url\": \"image-url\",\n  \"discount_type\": \"PERCENTAGE\",\n  \"discount_value\": 20,\n  \"min_order_amount\": 50,\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2024-12-31\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/offers",
+              "host": ["{{base_url}}"],
+              "path": ["offers"]
+            }
+          }
+        },
+        {
+          "name": "Update Offer",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Offer Title\",\n  \"discount_value\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/:id",
+              "host": ["{{base_url}}"],
+              "path": ["offers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "offer-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Offer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/offers/:id",
+              "host": ["{{base_url}}"],
+              "path": ["offers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "offer-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "item": [
+        {
+          "name": "Get All Coupons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/coupons?search=xxx&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["coupons"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "xxx"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SAVE20\",\n  \"description\": \"20% off\",\n  \"discount_type\": \"percentage\",\n  \"discount_value\": 20,\n  \"min_order_amount\": 50,\n  \"max_discount_amount\": 100,\n  \"usage_limit\": 100,\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2024-12-31\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/coupons",
+              "host": ["{{base_url}}"],
+              "path": ["coupons"]
+            }
+          }
+        },
+        {
+          "name": "Update Coupon",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discount_value\": 25,\n  \"is_active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/coupons/:id",
+              "host": ["{{base_url}}"],
+              "path": ["coupons", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "coupon-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Coupon",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/coupons/:id",
+              "host": ["{{base_url}}"],
+              "path": ["coupons", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "coupon-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Get All Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/drivers",
+              "host": ["{{base_url}}"],
+              "path": ["drivers"]
+            }
+          }
+        },
+        {
+          "name": "Create Driver",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-id\",\n  \"vehicleType\": \"CAR\",\n  \"licensePlate\": \"ABC123\",\n  \"licenseNumber\": \"LIC123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/drivers",
+              "host": ["{{base_url}}"],
+              "path": ["drivers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "Get User Favorite Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/favorites/products",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "products"]
+            }
+          }
+        },
+        {
+          "name": "Add Product to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/favorites/products/:productId",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "products", ":productId"],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "product-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Favorites Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/favorites/products/:productId/count",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "products", ":productId", "count"],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "product-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Restaurant Favorites Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/favorites/restaurants/:restaurantId/count",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "restaurants", ":restaurantId", "count"],
+              "variable": [
+                {
+                  "key": "restaurantId",
+                  "value": "restaurant-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Upload Restaurant Images",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/restaurant",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "restaurant"]
+            }
+          }
+        },
+        {
+          "name": "Upload Product Images (Multiple)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/product/multiple",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "product", "multiple"]
+            }
+          }
+        },
+        {
+          "name": "Upload User Avatar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/user/avatar",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "user", "avatar"]
+            }
+          }
+        },
+        {
+          "name": "Upload Offer Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "offer_image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/offer",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "offer"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Get Available Permissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "permissions"]
+            }
+          }
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Splash Screens",
+      "item": [
+        {
+          "name": "Get Active Splash Screens (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/splash/active",
+              "host": ["{{base_url}}"],
+              "path": ["splash", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get All Splash Screens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/splash",
+              "host": ["{{base_url}}"],
+              "path": ["splash"]
+            }
+          }
+        },
+        {
+          "name": "Create Splash Screen",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"image-url\",\n  \"duration\": 3000,\n  \"sortOrder\": 0,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/splash",
+              "host": ["{{base_url}}"],
+              "path": ["splash"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Onboarding Screens",
+      "item": [
+        {
+          "name": "Get Active Onboarding Screens (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/onboarding/active",
+              "host": ["{{base_url}}"],
+              "path": ["onboarding", "active"]
+            }
+          }
+        },
+        {
+          "name": "Create Onboarding Screen",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Title\",\n  \"titleAr\": \"العنوان\",\n  \"description\": \"Description\",\n  \"descriptionAr\": \"الوصف\",\n  \"image\": \"image-url\",\n  \"sortOrder\": 0,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/onboarding",
+              "host": ["{{base_url}}"],
+              "path": ["onboarding"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard KPIs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/kpis",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "kpis"]
+            }
+          }
+        },
+        {
+          "name": "Get Revenue Chart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/revenue-chart?period=month",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "revenue-chart"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/active-orders",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "active-orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/mark-all-read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "mark-all-read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Get Chat Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/messages?order_id=xxx",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "messages"],
+              "query": [
+                {
+                  "key": "order_id",
+                  "value": "xxx"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Chat Messages (Courier Order)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/messages?courier_order_id=xxx",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "messages"],
+              "query": [
+                {
+                  "key": "courier_order_id",
+                  "value": "xxx"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Messages as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": \"order-id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/chat/messages/read",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "messages", "read"]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/messages/unread-count",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "messages", "unread-count"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courier Orders",
+      "item": [
+        {
+          "name": "Calculate Cost (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courier/calculate-cost?pickup_latitude=25.1234&pickup_longitude=45.6789&delivery_latitude=25.2345&delivery_longitude=45.7890&weight=1.5",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "calculate-cost"],
+              "query": [
+                {
+                  "key": "pickup_latitude",
+                  "value": "25.1234"
+                },
+                {
+                  "key": "pickup_longitude",
+                  "value": "45.6789"
+                },
+                {
+                  "key": "delivery_latitude",
+                  "value": "25.2345"
+                },
+                {
+                  "key": "delivery_longitude",
+                  "value": "45.7890"
+                },
+                {
+                  "key": "weight",
+                  "value": "1.5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Methods (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courier/payment-methods",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "payment-methods"]
+            }
+          }
+        },
+        {
+          "name": "Create Courier Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"user-id\",\n  \"pickup_address_id\": \"address-id\",\n  \"delivery_address_id\": \"address-id\",\n  \"description\": \"Package description\",\n  \"images\": \"[\\\"url1\\\", \\\"url2\\\"]\",\n  \"weight\": 1.5,\n  \"payment_method\": \"CASH\",\n  \"coupon_code\": \"SAVE20\",\n  \"notes\": \"Special instructions\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/courier/orders",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get All Courier Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courier/orders?status=PENDING&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Courier Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courier/orders/:id",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "courier-order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Courier Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/courier/orders/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "courier-order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign Driver to Courier Order",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driver_id\": \"driver-id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/courier/orders/:id/assign-driver",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders", ":id", "assign-driver"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "courier-order-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Courier Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courier/orders/:id/tracking",
+              "host": ["{{base_url}}"],
+              "path": ["courier", "orders", ":id", "tracking"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "courier-order-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

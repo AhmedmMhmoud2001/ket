@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Prisma
+prisma/migrations/.migration_lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Uploads (keep folders, ignore uploaded files)
+uploads/**/*
+!uploads/.gitkeep
+!uploads/restaurants/
+!uploads/restaurants/logos/
+!uploads/restaurants/logos/.gitkeep
+!uploads/restaurants/banners/
+!uploads/restaurants/banners/.gitkeep
+!uploads/products/
+!uploads/products/.gitkeep
+!uploads/categories/
+!uploads/categories/.gitkeep
+!uploads/drivers/
+!uploads/drivers/.gitkeep
+
