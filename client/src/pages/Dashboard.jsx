@@ -200,7 +200,7 @@ const Dashboard = () => {
                 {/* Order Status Distribution (Bar Chart) */}
                 <div className="card">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Order Status Distribution</h2>
-                    <div className="h-80 min-h-0">
+                    <div className="h-80 min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                             <BarChart data={orderStatusData.length > 0 ? orderStatusData : [{ name: 'No Data', value: 0 }]}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -216,7 +216,7 @@ const Dashboard = () => {
                 {/* Order Trends (Line Chart) */}
                 <div className="card">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Order Trends (7 Days)</h2>
-                    <div className="h-80 min-h-0">
+                    <div className="h-80 min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                             <LineChart data={orderTrendsData.length > 0 ? orderTrendsData : []}>
                                 <defs>
@@ -259,7 +259,7 @@ const Dashboard = () => {
                     {/* Revenue Chart */}
                     <div className="card">
                         <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.revenueAnalytics')}</h2>
-                        <div className="h-80 min-h-0">
+                        <div className="h-80 min-h-[300px]">
                             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                                 <AreaChart data={chartData}>
                                     <defs>
@@ -350,7 +350,7 @@ const Dashboard = () => {
                     {/* Order Sources (Pie Chart) */}
                     <div className="card flex flex-col items-center justify-center">
                         <h2 className="text-lg font-bold text-gray-900 mb-4 w-full text-left">{t('dashboard.paymentMethods')}</h2>
-                        <div className="h-64 w-full relative min-h-0">
+                        <div className="h-64 w-full relative min-h-[200px]">
                             <ResponsiveContainer width="100%" height="100%" minHeight={200}>
                                 <PieChart>
                                     <Pie

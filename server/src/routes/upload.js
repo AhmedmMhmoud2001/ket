@@ -251,7 +251,7 @@ router.post('/offer',
 // Upload splash screen image
 // Processed by Sharp: 1080x1920 (Mobile vertical), WebP format
 router.post('/splash',
-    authorize('SUPER_ADMIN'),
+    authorize('ADMIN'),
     ...uploadSplashImage,
     handleUploadError,
     (req, res) => {
@@ -284,7 +284,7 @@ router.post('/splash',
 // Upload onboarding screen image
 // Processed by Sharp: 1080x1920 (Mobile vertical), WebP format
 router.post('/onboarding',
-    authorize('SUPER_ADMIN'),
+    authorize('ADMIN'),
     ...uploadOnboardingImage,
     handleUploadError,
     (req, res) => {
