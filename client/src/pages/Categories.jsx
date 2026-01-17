@@ -119,18 +119,20 @@ const Categories = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {category.image_url ? (
+                                                {(category.imageUrl || category.image_url) ? (
                                                     <img
-                                                        src={category.image_url.startsWith('http') ? category.image_url : `http://localhost:5000${category.image_url}`}
-                                                        alt={category.name}
+                                                        src={(category.imageUrl || category.image_url).startsWith('http')
+                                                            ? (category.imageUrl || category.image_url)
+                                                            : `${import.meta.env.VITE_API_URL}${category.imageUrl || category.image_url}`}
+                                                        alt={category.nameEn}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <span className="text-2xl">{category.icon || '📁'}</span>
+                                                    <RectangleStackIcon className="w-6 h-6 text-gray-400" />
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-gray-900">{category.name}</div>
+                                                <div className="font-semibold text-gray-900">{category.nameEn}</div>
                                                 <div className="text-sm text-gray-500 font-medium">{category.nameAr}</div>
                                             </div>
                                         </div>

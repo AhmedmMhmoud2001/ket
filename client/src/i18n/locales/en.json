@@ -14,7 +14,6 @@
     "reviews": "Reviews",
     "support": "Support",
     "splashScreens": "Splash Screens",
-    "onboarding": "Onboarding",
     "settings": "Settings",
     "logs": "Logs",
     "profile": "Profile",
@@ -123,10 +122,14 @@
   },
   "restaurants": {
     "title": "Restaurants",
+    "description": "Manage all restaurants",
+    "add": "Add New Restaurant",
+    "edit": "Edit Restaurant",
     "addRestaurant": "Add Restaurant",
     "editRestaurant": "Edit Restaurant",
     "restaurantDetails": "Restaurant Details",
-    "noRestaurants": "No restaurants found"
+    "noRestaurants": "No restaurants found",
+    "logo": "Restaurant Logo"
   },
   "products": {
     "title": "Products",
@@ -279,4 +282,3 @@
     "allStatuses": "All Statuses"
   }
 }
-

@@ -13,6 +13,7 @@ import Categories from './pages/Categories';
 import SubcategoryForm from './pages/SubcategoryForm';
 import Subcategories from './pages/Subcategories';
 import Products from './pages/Products';
+import ProductForm from './pages/ProductForm';
 import Users from './pages/Users';
 import UserDetails from './pages/UserDetails';
 import Coupons from './pages/Coupons';
@@ -29,6 +30,7 @@ import Permissions from './pages/Permissions';
 import Logs from './pages/Logs';
 import Reviews from './pages/Reviews';
 import Restaurants from './pages/Restaurants';
+import RestaurantForm from './pages/RestaurantForm';
 import ShippingAgents from './pages/ShippingAgents';
 import ShippingOrders from './pages/ShippingOrders';
 import SplashScreens from './pages/SplashScreens';
@@ -86,6 +88,8 @@ function App() {
                         <Route path="subcategories/new" element={<SubcategoryForm />} />
                         <Route path="subcategories/:id/edit" element={<SubcategoryForm />} />
                         <Route path="products" element={<Products />} />
+                        <Route path="products/new" element={<ProductForm />} />
+                        <Route path="products/:id/edit" element={<ProductForm />} />
                         <Route path="coupons" element={<Coupons />} />
                         <Route path="offers" element={<Offers />} />
                         <Route path="notifications" element={<Notifications />} />
@@ -95,6 +99,8 @@ function App() {
                         <Route path="logs" element={<Logs />} />
                         <Route path="reviews" element={<Reviews />} />
                         <Route path="restaurants" element={<Restaurants />} />
+                        <Route path="restaurants/new" element={<RestaurantForm />} />
+                        <Route path="restaurants/:id/edit" element={<RestaurantForm />} />
                         <Route path="shipping-agents" element={<ShippingAgents />} />
                         <Route path="shipping-orders" element={<ShippingOrders />} />
                         <Route path="splash-screens" element={<SplashScreens />} />

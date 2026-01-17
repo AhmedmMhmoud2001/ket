@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
     MagnifyingGlassIcon,
     ShoppingBagIcon,
     BuildingStorefrontIcon,
     TagIcon,
     TrashIcon,
-    EyeIcon,
+    PencilSquareIcon,
+    PlusIcon,
     NoSymbolIcon,
     CheckCircleIcon
 } from '@heroicons/react/24/outline';
@@ -67,9 +69,15 @@ const Products = () => {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Products Management</h1>
-                <p className="text-gray-500">View and manage all products across all restaurants</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Products Management</h1>
+                    <p className="text-gray-500">View and manage all products across all restaurants</p>
+                </div>
+                <Link to="/products/new" className="btn btn-primary">
+                    <PlusIcon className="w-5 h-5 mr-2" />
+                    Add Product
+                </Link>
             </div>
 
             <div className="card">
@@ -117,7 +125,7 @@ const Products = () => {
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {product.images && product.images.length > 0 ? (
                                                     <img
-                                                        src={product.images[0]?.imageUrl?.startsWith('http') ? product.images[0].imageUrl : `http://localhost:5000${product.images[0].imageUrl}`}
+                                                        src={product.images[0]?.imageUrl?.startsWith('http') ? product.images[0].imageUrl : `${import.meta.env.VITE_API_URL}${product.images[0].imageUrl}`}
                                                         alt={product.nameEn || product.nameAr}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -131,9 +139,6 @@ const Products = () => {
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <TagIcon className="w-3 h-3 text-gray-400" />
                                                     <span className="text-xs text-gray-500">{product.subcategory?.nameEn || product.subcategory?.name || 'No Category'}</span>
-                                                    {product.images && product.images.length > 0 && (
-                                                        <span className="text-xs text-gray-400">• {product.images.length} {product.images.length === 1 ? 'image' : 'images'}</span>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -141,7 +146,7 @@ const Products = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <BuildingStorefrontIcon className="w-4 h-4 text-gray-400" />
-                                            <span className="text-sm text-gray-700">{product.restaurant?.name || 'Global'}</span>
+                                            <span className="text-sm text-gray-700">{product.restaurant?.nameEn || product.restaurant?.name || 'Global'}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 font-bold text-gray-900">
@@ -161,6 +166,13 @@ const Products = () => {
                                             >
                                                 {product.isAvailable ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
                                             </button>
+                                            <Link
+                                                to={`/products/${product.id}/edit`}
+                                                className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                                title="Edit"
+                                            >
+                                                <PencilSquareIcon className="w-5 h-5" />
+                                            </Link>
                                             <button
                                                 onClick={() => deleteProduct(product.id)}
                                                 className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"

@@ -43,7 +43,7 @@ const Restaurants = () => {
                 limit: pagination.limit
             });
             if (statusFilter) params.append('isActive', statusFilter === 'active');
-            
+
             const res = await api.get(`/restaurants?${params}`);
             setRestaurants(res.data.data.restaurants || []);
             if (res.data.data.pagination) {
@@ -141,16 +141,15 @@ const Restaurants = () => {
                             <div key={restaurant.id} className="card hover:shadow-lg transition-shadow">
                                 {/* Restaurant Image */}
                                 <div className="relative h-48 bg-gray-200 rounded-t-lg overflow-hidden">
-                                    {restaurant.logo ? (
-                                        <img src={`${import.meta.env.VITE_API_URL}/uploads/restaurants/logos/${restaurant.logo}`} alt={getName(restaurant)} className="w-full h-full object-cover" />
+                                    {restaurant.imageUrl ? (
+                                        <img src={restaurant.imageUrl.startsWith('http') ? restaurant.imageUrl : `${import.meta.env.VITE_API_URL}${restaurant.imageUrl}`} alt={getName(restaurant)} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <BuildingStorefrontIcon className="w-16 h-16 text-gray-400" />
                                         </div>
                                     )}
-                                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${
-                                        restaurant.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                    }`}>
+                                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${restaurant.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                        }`}>
                                         {restaurant.isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
                                     </div>
                                 </div>
@@ -158,7 +157,7 @@ const Restaurants = () => {
                                 {/* Restaurant Info */}
                                 <div className="p-6">
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">{getName(restaurant)}</h3>
-                                    
+
                                     {restaurant.category && (
                                         <p className="text-sm text-gray-600 mb-3">
                                             {i18n.language === 'ar' ? restaurant.category.nameAr : restaurant.category.nameEn}
@@ -182,11 +181,10 @@ const Restaurants = () => {
                                     <div className="flex gap-2 pt-4 border-t border-gray-100">
                                         <button
                                             onClick={() => toggleStatus(restaurant.id, restaurant.isActive)}
-                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                restaurant.isActive
-                                                    ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                    : 'bg-green-50 text-green-700 hover:bg-green-100'
-                                            }`}
+                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${restaurant.isActive
+                                                ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                }`}
                                         >
                                             {restaurant.isActive ? (
                                                 <>
@@ -200,6 +198,12 @@ const Restaurants = () => {
                                                 </>
                                             )}
                                         </button>
+                                        <Link
+                                            to={`/restaurants/${restaurant.id}/edit`}
+                                            className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                                        >
+                                            <PencilSquareIcon className="w-4 h-4" />
+                                        </Link>
                                         <button
                                             onClick={() => deleteRestaurant(restaurant.id)}
                                             className="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
