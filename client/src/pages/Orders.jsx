@@ -81,10 +81,10 @@ const Orders = () => {
                         value={filters.payment_status}
                         onChange={(e) => setFilters({ ...filters, payment_status: e.target.value })}
                     >
-                        <option value="">Payment Status</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                        <option value="failed">Failed</option>
+                        <option value="">{t('orders.paymentStatus')}</option>
+                        <option value="paid">{t('orders.paid')}</option>
+                        <option value="pending">{t('orders.pending')}</option>
+                        <option value="failed">{t('orders.failed')}</option>
                     </select>
                 </div>
             </div>
@@ -94,13 +94,13 @@ const Orders = () => {
                 <table className="w-full text-left">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Order ID</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Customer</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Restaurant</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Total</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Date</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Actions</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.orderId')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.customer')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.restaurant')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.total')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.status')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">{t('orders.date')}</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">{t('common.actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -115,7 +115,7 @@ const Orders = () => {
                         ) : orders.length === 0 ? (
                             <tr>
                                 <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                                    No orders found.
+                                    {t('orders.noOrders')}
                                 </td>
                             </tr>
                         ) : (
@@ -149,7 +149,7 @@ const Orders = () => {
                                             className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium text-sm"
                                         >
                                             <EyeIcon className="w-4 h-4 mr-1" />
-                                            View
+                                            {t('orders.view')}
                                         </Link>
                                     </td>
                                 </tr>

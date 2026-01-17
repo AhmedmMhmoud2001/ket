@@ -60,11 +60,19 @@ exports.authorize = (...allowedRoles) => {
             });
         }
 
-        const userRoles = req.user.roles;
+        const userRoles = req.user.roles || [];
+
+        // Normalize roles to uppercase for comparison
+        const normalizedUserRoles = Array.isArray(userRoles)
+            ? userRoles.map(role => String(role).toUpperCase())
+            : [];
+        
+        // Normalize allowed roles to uppercase
+        const normalizedAllowedRoles = allowedRoles.map(role => String(role).toUpperCase());
 
         // Check if user has at least one of the allowed roles
-        const hasPermission = allowedRoles.some(role =>
-            userRoles.includes(role.toUpperCase())
+        const hasPermission = normalizedAllowedRoles.some(role =>
+            normalizedUserRoles.includes(role)
         );
 
         if (!hasPermission) {

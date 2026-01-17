@@ -4,18 +4,21 @@ const { deleteFile } = require('../utils/fileHandler');
 // Get all subcategories with filtering
 exports.getAllSubcategories = async (req, res) => {
     try {
-        const { search, category_id, is_active, page = 1, limit = 10 } = req.query;
+        const { search, restaurant_id, is_active, page = 1, limit = 10 } = req.query;
         const skip = (page - 1) * limit;
         const take = parseInt(limit);
 
         const where = {};
 
         if (search) {
-            where.name = { contains: search };
+            where.OR = [
+                { nameEn: { contains: search } },
+                { nameAr: { contains: search } }
+            ];
         }
 
-        if (category_id) {
-            where.categoryId = category_id;
+        if (restaurant_id) {
+            where.restaurantId = restaurant_id;
         }
 
         if (is_active !== undefined) {
@@ -26,13 +29,14 @@ exports.getAllSubcategories = async (req, res) => {
             prisma.subcategory.findMany({
                 where,
                 include: {
-                    category: {
+                    restaurant: {
                         select: {
-                            name: true
+                            nameEn: true,
+                            nameAr: true
                         }
                     }
                 },
-                orderBy: { createdAt: 'desc' },
+                orderBy: { id: 'desc' },
                 skip,
                 take
             }),
@@ -42,7 +46,7 @@ exports.getAllSubcategories = async (req, res) => {
         // Format response
         const formattedSubcategories = subcategories.map(sub => ({
             ...sub,
-            category_name: sub.category?.name
+            restaurant_name: sub.restaurant?.nameEn || sub.restaurant?.nameAr
         }));
 
         res.json({
@@ -71,11 +75,11 @@ exports.getSubcategoryById = async (req, res) => {
         const subcategory = await prisma.subcategory.findUnique({
             where: { id },
             include: {
-                category: {
+                restaurant: {
                     select: {
                         id: true,
-                        name: true,
-                        icon: true
+                        nameEn: true,
+                        nameAr: true
                     }
                 }
             }
@@ -101,19 +105,17 @@ exports.getSubcategoryById = async (req, res) => {
 // Create Subcategory
 exports.createSubcategory = async (req, res) => {
     try {
-        const { category_id, name, name_ar, image_url, sort_order, is_active } = req.body;
+        const { restaurant_id, name_en, name_ar, is_active } = req.body;
 
-        if (!category_id || !name) {
-            return res.status(400).json({ success: false, message: 'Category and Name are required' });
+        if (!restaurant_id || !name_en || !name_ar) {
+            return res.status(400).json({ success: false, message: 'Restaurant, Name (EN) and Name (AR) are required' });
         }
 
         const subcategory = await prisma.subcategory.create({
             data: {
-                categoryId: category_id,
-                name: name,
-                nameAr: name_ar || null,
-                image: image_url || null,
-                sortOrder: sort_order || 0,
+                restaurantId: restaurant_id,
+                nameEn: name_en,
+                nameAr: name_ar,
                 isActive: is_active !== undefined ? is_active : true
             }
         });
@@ -133,7 +135,7 @@ exports.createSubcategory = async (req, res) => {
 exports.updateSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { category_id, name, name_ar, image_url, sort_order, is_active } = req.body;
+        const { restaurant_id, name_en, name_ar, is_active } = req.body;
 
         const existingSubcategory = await prisma.subcategory.findUnique({
             where: { id }
@@ -146,19 +148,10 @@ exports.updateSubcategory = async (req, res) => {
             });
         }
 
-        // Delete old image if new one is provided
-        if (image_url && image_url !== existingSubcategory.image) {
-            if (existingSubcategory.image && existingSubcategory.image.startsWith('/uploads/')) {
-                deleteFile(existingSubcategory.image);
-            }
-        }
-
         const updateData = {};
-        if (category_id !== undefined) updateData.categoryId = category_id;
-        if (name !== undefined) updateData.name = name;
+        if (restaurant_id !== undefined) updateData.restaurantId = restaurant_id;
+        if (name_en !== undefined) updateData.nameEn = name_en;
         if (name_ar !== undefined) updateData.nameAr = name_ar;
-        if (image_url !== undefined) updateData.image = image_url;
-        if (sort_order !== undefined) updateData.sortOrder = parseInt(sort_order);
         if (is_active !== undefined) updateData.isActive = is_active;
 
         const subcategory = await prisma.subcategory.update({
@@ -240,11 +233,6 @@ exports.deleteSubcategory = async (req, res) => {
         await prisma.subcategory.delete({
             where: { id }
         });
-
-        // Delete image if exists
-        if (subcategory.image && subcategory.image.startsWith('/uploads/')) {
-            deleteFile(subcategory.image);
-        }
         
         res.json({ success: true, message: 'Subcategory deleted successfully' });
     } catch (error) {

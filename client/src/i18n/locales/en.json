@@ -45,7 +45,16 @@
     "previous": "Previous",
     "english": "English",
     "arabic": "Arabic",
-    "language": "Language"
+    "language": "Language",
+    "shippingAgents": "Shipping Agents",
+    "shippingOrders": "Shipping Orders",
+    "splash": "Splash",
+    "onboarding": "Onboarding",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "about": "About App",
+    "view": "View",
+    "points": "Points"
   },
   "forms": {
     "name": "Name",
@@ -85,6 +94,8 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "overview": "Dashboard Overview",
+    "lastUpdated": "Last updated",
     "totalRevenue": "Total Revenue",
     "totalOrders": "Total Orders",
     "totalCustomers": "Total Customers",
@@ -92,10 +103,23 @@
     "onlineWorking": "Online & Working",
     "vsLastPeriod": "vs last period",
     "revenueChart": "Revenue Chart",
+    "revenueAnalytics": "Revenue Analytics (Last 7 Days)",
     "orderSources": "Order Sources",
+    "paymentMethods": "Payment Methods",
     "activeOrders": "Active Orders",
+    "activeOrdersStatus": "Active Orders Status",
     "recentActivity": "Recent Activity",
-    "viewAllActivity": "View All Activity"
+    "viewAllActivity": "View All Activity",
+    "viewAll": "View All",
+    "noActiveOrders": "No active orders right now.",
+    "noRecentActivity": "No recent activity.",
+    "orderId": "Order ID",
+    "customer": "Customer",
+    "driver": "Driver",
+    "time": "Time",
+    "unassigned": "Unassigned",
+    "total": "Total",
+    "failedToLoad": "Failed to load dashboard data"
   },
   "restaurants": {
     "title": "Restaurants",
@@ -109,7 +133,10 @@
     "addProduct": "Add Product",
     "editProduct": "Edit Product",
     "productDetails": "Product Details",
-    "noProducts": "No products found"
+    "product": "Product",
+    "price": "Price",
+    "noProducts": "No products found",
+    "noProductsFound": "No products found."
   },
   "categories": {
     "title": "Categories",
@@ -155,7 +182,16 @@
     "status": "Status",
     "paymentStatus": "Payment Status",
     "date": "Date",
-    "noOrders": "No orders found"
+    "noOrders": "No orders found",
+    "paid": "Paid",
+    "pending": "Pending",
+    "failed": "Failed",
+    "view": "View",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "onTheWay": "On The Way",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
   },
   "users": {
     "title": "Users",
@@ -164,6 +200,8 @@
     "userDetails": "User Details",
     "fullName": "Full Name",
     "role": "Role",
+    "roles": "Roles",
+    "joinedAt": "Joined At",
     "noUsers": "No users found"
   },
   "drivers": {
@@ -171,6 +209,10 @@
     "addDriver": "Add Driver",
     "editDriver": "Edit Driver",
     "driverDetails": "Driver Details",
+    "vehicle": "Vehicle",
+    "rating": "Rating",
+    "totalDeliveries": "Total Deliveries",
+    "location": "Location",
     "noDrivers": "No drivers found"
   },
   "auth": {

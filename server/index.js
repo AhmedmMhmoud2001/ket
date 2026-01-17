@@ -76,6 +76,7 @@ app.use('/api/drivers', require('./src/routes/drivers'));
 app.use('/api/subcategories', require('./src/routes/subcategories'));
 app.use('/api/offers', require('./src/routes/offers'));
 app.use('/api/notifications', require('./src/routes/notifications'));
+app.use('/api/addresses', require('./src/routes/userAddress'));
 app.use('/api/coupons', require('./src/routes/coupons'));
 app.use('/api/upload', require('./src/routes/upload'));
 app.use('/api/roles', require('./src/routes/roles'));
@@ -88,6 +89,15 @@ app.use('/api/restaurant-owner', require('./src/routes/restaurantOwner'));
 app.use('/api/shipping-agents', shippingAgentRoutes);
 app.use('/api/shipping-orders', shippingOrderRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/points', require('./src/routes/points'));
+app.use('/api', require('./src/routes/content'));
+app.use('/api/cart', require('./src/routes/cart'));
+app.use('/api/order-status-history', require('./src/routes/orderStatusHistory'));
+app.use('/api/restaurant-hours', require('./src/routes/restaurantHours'));
+app.use('/api/payment-methods', require('./src/routes/paymentMethods'));
+app.use('/api/driver-location', require('./src/routes/driverLocation'));
+app.use('/api/delivery-zones', require('./src/routes/deliveryZone'));
+app.use('/api/delivery-time-estimate', require('./src/routes/deliveryTimeEstimate'));
 
 // Socket.io connection handling
 io.on('connection', (socket) => {

@@ -23,7 +23,7 @@ const Navbar = ({ toggleSidebar }) => {
 
     return (
         <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-30">
-            <div className="h-full px-6 flex items-center justify-between">
+            <div className={`h-full px-6 flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                 {/* Left side */}
                 <button
                     onClick={toggleSidebar}
@@ -33,7 +33,7 @@ const Navbar = ({ toggleSidebar }) => {
                 </button>
 
                 {/* Right side */}
-                <div className="ml-auto flex items-center space-x-4">
+                <div className={`${i18n.language === 'ar' ? 'mr-auto' : 'ml-auto'} flex items-center ${i18n.language === 'ar' ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
                     {/* Language Switcher */}
                     <Menu as="div" className="relative">
                         <Menu.Button className="p-2 rounded-lg hover:bg-gray-100">
@@ -48,7 +48,7 @@ const Navbar = ({ toggleSidebar }) => {
                             leaveFrom="transform opacity-100 scale-100"
                             leaveTo="transform opacity-0 scale-95"
                         >
-                            <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <Menu.Items className={`absolute ${i18n.language === 'ar' ? 'left-0 origin-top-left' : 'right-0 origin-top-right'} mt-2 w-40 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}>
                                 <div className="p-1">
                                     <Menu.Item>
                                         {({ active }) => (
@@ -83,8 +83,8 @@ const Navbar = ({ toggleSidebar }) => {
 
                     {/* User menu */}
                     <Menu as="div" className="relative">
-                        <Menu.Button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-                            <div className="text-right hidden sm:block">
+                        <Menu.Button className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'} p-2 rounded-lg hover:bg-gray-100`}>
+                            <div className={`${i18n.language === 'ar' ? 'text-left' : 'text-right'} hidden sm:block`}>
                                 <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
                             </div>
@@ -109,7 +109,7 @@ const Navbar = ({ toggleSidebar }) => {
                                                 className={`${active ? 'bg-gray-100' : ''
                                                     } flex items-center w-full px-4 py-2 text-sm text-gray-700 rounded-lg`}
                                             >
-                                                <UserCircleIcon className="w-5 h-5 mr-3" />
+                                                <UserCircleIcon className={`w-5 h-5 ${i18n.language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                                                 {t('common.profile')}
                                             </Link>
                                         )}
@@ -122,7 +122,7 @@ const Navbar = ({ toggleSidebar }) => {
                                                 className={`${active ? 'bg-gray-100' : ''
                                                     } flex items-center w-full px-4 py-2 text-sm text-red-600 rounded-lg`}
                                             >
-                                                <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3" />
+                                                <ArrowRightOnRectangleIcon className={`w-5 h-5 ${i18n.language === 'ar' ? 'ml-3' : 'mr-3'}`} />
                                                 {t('common.logout')}
                                             </button>
                                         )}

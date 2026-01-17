@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
     MagnifyingGlassIcon,
     UserCircleIcon,
@@ -7,13 +8,16 @@ import {
     ShieldCheckIcon,
     TrashIcon,
     NoSymbolIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    EyeIcon
 } from '@heroicons/react/24/outline';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import Pagination from '../components/Pagination';
+import { useTranslation } from 'react-i18next';
 
 const Users = () => {
+    const { t } = useTranslation();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -75,7 +79,7 @@ const Users = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
                 <p className="text-gray-500">Manage all system users and their roles</p>
             </div>
 
@@ -95,11 +99,11 @@ const Users = () => {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
-                                <th className="px-6 py-4">User</th>
-                                <th className="px-6 py-4">Roles</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Joined At</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-6 py-4">{t('users.title')}</th>
+                                <th className="px-6 py-4">{t('users.roles')}</th>
+                                <th className="px-6 py-4">{t('common.status')}</th>
+                                <th className="px-6 py-4">{t('users.joinedAt')}</th>
+                                <th className="px-6 py-4 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -114,7 +118,7 @@ const Users = () => {
                             ) : users.length === 0 ? (
                                 <tr>
                                     <td colSpan="5" className="text-center py-8 text-gray-500">
-                                        No users found.
+                                        {t('users.noUsers')}
                                     </td>
                                 </tr>
                             ) : users.map(user => {
@@ -154,6 +158,13 @@ const Users = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    to={`/users/${user.id}`}
+                                                    className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
+                                                    title="View Details"
+                                                >
+                                                    <EyeIcon className="w-5 h-5" />
+                                                </Link>
                                                 <button
                                                     onClick={() => toggleUserStatus(user.id, user.isActive)}
                                                     className={`p-2 rounded-lg transition-colors ${user.isActive ? 'text-orange-500 hover:bg-orange-50' : 'text-green-500 hover:bg-green-50'}`}

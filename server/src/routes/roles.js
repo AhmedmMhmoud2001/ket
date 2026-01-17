@@ -4,9 +4,9 @@ const roleController = require('../controllers/roleController');
 const { protect } = require('../middleware/auth');
 const roleMiddleware = require('../middleware/role');
 
-// All routes require authentication and SUPER_ADMIN role
+// All routes require authentication and ADMIN role
 router.use(protect);
-router.use(roleMiddleware('SUPER_ADMIN'));
+router.use(roleMiddleware('ADMIN'));
 
 // Get all available permissions
 router.get('/permissions', roleController.getAvailablePermissions);

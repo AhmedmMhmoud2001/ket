@@ -39,16 +39,14 @@ const Roles = () => {
         setShowPermissions(true);
     };
 
-    const getRoleColor = (roleId) => {
-        const colors = {
-            'SUPER_ADMIN': 'purple',
-            'RESTAURANT_MANAGER': 'blue',
-            'SUPPORT_AGENT': 'green',
-            'ANALYST': 'yellow',
-            'DRIVER': 'orange',
-            'CUSTOMER': 'gray'
-        };
-        return colors[roleId] || 'gray';
+    const getRoleColorClasses = (roleName) => {
+        const roleUpper = String(roleName).toUpperCase();
+        if (roleUpper.includes('ADMIN')) return { bg: 'bg-purple-50', border: 'border-purple-100', icon: 'bg-purple-100 text-purple-600', badge: 'bg-purple-100 text-purple-700' };
+        if (roleUpper.includes('RESTAURANT')) return { bg: 'bg-blue-50', border: 'border-blue-100', icon: 'bg-blue-100 text-blue-600', badge: 'bg-blue-100 text-blue-700' };
+        if (roleUpper.includes('DRIVER')) return { bg: 'bg-orange-50', border: 'border-orange-100', icon: 'bg-orange-100 text-orange-600', badge: 'bg-orange-100 text-orange-700' };
+        if (roleUpper.includes('SUPPORT')) return { bg: 'bg-green-50', border: 'border-green-100', icon: 'bg-green-100 text-green-600', badge: 'bg-green-100 text-green-700' };
+        if (roleUpper.includes('CUSTOMER')) return { bg: 'bg-gray-50', border: 'border-gray-100', icon: 'bg-gray-100 text-gray-600', badge: 'bg-gray-100 text-gray-700' };
+        return { bg: 'bg-gray-50', border: 'border-gray-100', icon: 'bg-gray-100 text-gray-600', badge: 'bg-gray-100 text-gray-700' };
     };
 
     const getRoleIcon = (roleId) => {
@@ -80,7 +78,7 @@ const Roles = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {roles.map((role) => {
-                        const color = getRoleColor(role.id);
+                        const colorClasses = getRoleColorClasses(role.name);
                         const permissionCount = Object.values(role.permissions || {}).reduce(
                             (acc, perms) => acc + perms.length, 0
                         );
@@ -91,13 +89,13 @@ const Roles = () => {
                                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
                             >
                                 {/* Header */}
-                                <div className={`bg-${color}-50 border-b border-${color}-100 p-6`}>
+                                <div className={`${colorClasses.bg} border-b ${colorClasses.border} p-6`}>
                                     <div className="flex items-start justify-between">
-                                        <div className={`w-12 h-12 bg-${color}-100 rounded-lg flex items-center justify-center text-${color}-600 group-hover:scale-110 transition-transform`}>
+                                        <div className={`w-12 h-12 ${colorClasses.icon} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                             {getRoleIcon(role.id)}
                                         </div>
                                         {role.isSystem && (
-                                            <span className={`px-2 py-1 bg-${color}-100 text-${color}-700 text-xs font-semibold rounded-full`}>
+                                            <span className={`px-2 py-1 ${colorClasses.badge} text-xs font-semibold rounded-full`}>
                                                 System
                                             </span>
                                         )}
@@ -160,10 +158,10 @@ const Roles = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                         {/* Header */}
-                        <div className={`px-6 py-4 border-b border-gray-100 bg-${getRoleColor(selectedRole.id)}-50`}>
+                        <div className={`px-6 py-4 border-b border-gray-100 ${getRoleColorClasses(selectedRole.name).bg}`}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 bg-${getRoleColor(selectedRole.id)}-100 rounded-lg flex items-center justify-center text-${getRoleColor(selectedRole.id)}-600`}>
+                                    <div className={`w-12 h-12 ${getRoleColorClasses(selectedRole.name).icon} rounded-lg flex items-center justify-center`}>
                                         {getRoleIcon(selectedRole.id)}
                                     </div>
                                     <div>

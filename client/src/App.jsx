@@ -14,6 +14,7 @@ import SubcategoryForm from './pages/SubcategoryForm';
 import Subcategories from './pages/Subcategories';
 import Products from './pages/Products';
 import Users from './pages/Users';
+import UserDetails from './pages/UserDetails';
 import Coupons from './pages/Coupons';
 import Offers from './pages/Offers';
 import Notifications from './pages/Notifications';
@@ -27,6 +28,15 @@ import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
 import Logs from './pages/Logs';
 import Reviews from './pages/Reviews';
+import Restaurants from './pages/Restaurants';
+import ShippingAgents from './pages/ShippingAgents';
+import ShippingOrders from './pages/ShippingOrders';
+import SplashScreens from './pages/SplashScreens';
+import Points from './pages/Points';
+import OnboardingScreens from './pages/OnboardingScreens';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import AboutApp from './pages/AboutApp';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -68,6 +78,7 @@ function App() {
                         <Route path="tracking/:id" element={<OrderTracking />} />
                         <Route path="drivers" element={<Drivers />} />
                         <Route path="users" element={<Users />} />
+                        <Route path="users/:id" element={<UserDetails />} />
                         <Route path="categories" element={<Categories />} />
                         <Route path="categories/new" element={<CategoryForm />} />
                         <Route path="categories/:id/edit" element={<CategoryForm />} />
@@ -83,6 +94,15 @@ function App() {
                         <Route path="permissions" element={<Permissions />} />
                         <Route path="logs" element={<Logs />} />
                         <Route path="reviews" element={<Reviews />} />
+                        <Route path="restaurants" element={<Restaurants />} />
+                        <Route path="shipping-agents" element={<ShippingAgents />} />
+                        <Route path="shipping-orders" element={<ShippingOrders />} />
+                        <Route path="splash-screens" element={<SplashScreens />} />
+                        <Route path="onboarding-screens" element={<OnboardingScreens />} />
+                        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="terms-of-service" element={<TermsOfService />} />
+                        <Route path="about-app" element={<AboutApp />} />
+                        <Route path="points" element={<Points />} />
 
                         {/* Restaurant Owner Routes */}
                         <Route path="restaurant-owner/dashboard" element={<RestaurantOwnerDashboard />} />

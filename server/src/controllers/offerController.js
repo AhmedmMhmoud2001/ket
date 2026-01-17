@@ -10,12 +10,8 @@ exports.getAllOffers = async (req, res) => {
         // Build where clause
         const where = {};
 
-        if (search) {
-            where.OR = [
-                { title: { contains: search } },
-                { description: { contains: search } }
-            ];
-        }
+        // Note: Promotion model doesn't have title/description fields for search
+        // Search can be done by type or discountType if needed in future
 
         if (restaurant_id) {
             where.restaurantId = restaurant_id;
@@ -26,13 +22,14 @@ exports.getAllOffers = async (req, res) => {
         }
 
         const [offers, total] = await Promise.all([
-            prisma.offer.findMany({
+            prisma.promotion.findMany({
                 where,
                 include: {
                     restaurant: {
                         select: {
                             id: true,
-                            name: true
+                            nameEn: true,
+                            nameAr: true
                         }
                     }
                 },
@@ -40,21 +37,19 @@ exports.getAllOffers = async (req, res) => {
                 skip,
                 take
             }),
-            prisma.offer.count({ where })
+            prisma.promotion.count({ where })
         ]);
 
         // Format for backward compatibility
         const formattedOffers = offers.map(offer => ({
             ...offer,
             restaurant_id: offer.restaurantId,
-            restaurant_name: offer.restaurant?.name,
-            discount_type: offer.type,
+            restaurant_name: offer.restaurant?.nameEn || offer.restaurant?.nameAr,
+            discount_type: offer.discountType,
             discount_value: offer.discountValue,
-            min_order_amount: offer.minOrderAmount,
-            start_date: offer.startDate,
-            end_date: offer.endDate,
+            start_date: offer.startAt,
+            end_date: offer.endAt,
             is_active: offer.isActive,
-            image_url: offer.image,
             created_at: offer.createdAt
         }));
 
@@ -85,13 +80,14 @@ exports.getOfferById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const offer = await prisma.offer.findUnique({
+        const offer = await prisma.promotion.findUnique({
             where: { id },
             include: {
                 restaurant: {
                     select: {
                         id: true,
-                        name: true
+                        nameEn: true,
+                        nameAr: true
                     }
                 }
             }
@@ -108,14 +104,12 @@ exports.getOfferById = async (req, res) => {
         const formattedOffer = {
             ...offer,
             restaurant_id: offer.restaurantId,
-            restaurant_name: offer.restaurant?.name,
-            discount_type: offer.type,
+            restaurant_name: offer.restaurant?.nameEn || offer.restaurant?.nameAr,
+            discount_type: offer.discountType,
             discount_value: offer.discountValue,
-            min_order_amount: offer.minOrderAmount,
-            start_date: offer.startDate,
-            end_date: offer.endDate,
-            is_active: offer.isActive,
-            image_url: offer.image
+            start_date: offer.startAt,
+            end_date: offer.endAt,
+            is_active: offer.isActive
         };
 
         res.json({
@@ -136,24 +130,19 @@ exports.getOfferById = async (req, res) => {
 exports.createOffer = async (req, res) => {
     try {
         const {
-            title,
-            title_ar,
-            description,
-            description_ar,
-            image_url,
+            type,
             discount_type,
             discount_value,
-            min_order_amount,
             restaurant_id,
             start_date,
             end_date,
             is_active
         } = req.body;
 
-        if (!title || !discount_type || !discount_value || !start_date || !end_date) {
+        if (!discount_type || !discount_value || !start_date || !end_date || !restaurant_id) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'Please provide all required fields: discount_type, discount_value, start_date, end_date, restaurant_id'
             });
         }
 
@@ -184,18 +173,15 @@ exports.createOffer = async (req, res) => {
             });
         }
 
-        const offer = await prisma.offer.create({
+        const offer = await prisma.promotion.create({
             data: {
-                title,
-                description: description || null,
-                type: discount_type.toUpperCase(),
+                type: type || 'DISCOUNT',
+                discountType: discount_type.toUpperCase(),
                 discountValue: parseFloat(discount_value),
-                minOrderAmount: min_order_amount ? parseFloat(min_order_amount) : 0,
-                restaurantId: restaurant_id || null,
-                startDate: new Date(start_date),
-                endDate: new Date(end_date),
-                isActive: is_active !== undefined ? is_active : true,
-                image: image_url || null
+                restaurantId: restaurant_id,
+                startAt: new Date(start_date),
+                endAt: new Date(end_date),
+                isActive: is_active !== undefined ? is_active : true
             }
         });
 
@@ -219,19 +205,16 @@ exports.updateOffer = async (req, res) => {
     try {
         const { id } = req.params;
         const {
-            title,
-            description,
-            image_url,
+            type,
             discount_type,
             discount_value,
-            min_order_amount,
             restaurant_id,
             start_date,
             end_date,
             is_active
         } = req.body;
 
-        const offer = await prisma.offer.findUnique({ where: { id } });
+        const offer = await prisma.promotion.findUnique({ where: { id } });
 
         if (!offer) {
             return res.status(404).json({
@@ -241,17 +224,14 @@ exports.updateOffer = async (req, res) => {
         }
 
         const updateData = {};
-        if (title !== undefined) updateData.title = title;
-        if (description !== undefined) updateData.description = description;
-        if (image_url !== undefined) updateData.image = image_url;
-        if (discount_type !== undefined) updateData.type = discount_type.toUpperCase();
+        if (type !== undefined) updateData.type = type;
+        if (discount_type !== undefined) updateData.discountType = discount_type.toUpperCase();
         if (discount_value !== undefined) updateData.discountValue = parseFloat(discount_value);
-        if (min_order_amount !== undefined) updateData.minOrderAmount = parseFloat(min_order_amount);
-        if (restaurant_id !== undefined) updateData.restaurantId = restaurant_id || null;
+        if (restaurant_id !== undefined) updateData.restaurantId = restaurant_id;
         
         // Handle date validation
-        const finalStartDate = start_date !== undefined ? new Date(start_date) : offer.startDate;
-        const finalEndDate = end_date !== undefined ? new Date(end_date) : offer.endDate;
+        const finalStartDate = start_date !== undefined ? new Date(start_date) : offer.startAt;
+        const finalEndDate = end_date !== undefined ? new Date(end_date) : offer.endAt;
         
         if (finalStartDate > finalEndDate) {
             return res.status(400).json({
@@ -270,7 +250,7 @@ exports.updateOffer = async (req, res) => {
                 });
             }
 
-            const finalDiscountType = discount_type !== undefined ? discount_type.toUpperCase() : offer.type;
+            const finalDiscountType = discount_type !== undefined ? discount_type.toUpperCase() : offer.discountType;
             if (finalDiscountType === 'PERCENTAGE' && discountValue > 100) {
                 return res.status(400).json({
                     success: false,
@@ -279,11 +259,11 @@ exports.updateOffer = async (req, res) => {
             }
         }
         
-        if (start_date !== undefined) updateData.startDate = finalStartDate;
-        if (end_date !== undefined) updateData.endDate = finalEndDate;
+        if (start_date !== undefined) updateData.startAt = finalStartDate;
+        if (end_date !== undefined) updateData.endAt = finalEndDate;
         if (is_active !== undefined) updateData.isActive = is_active;
 
-        await prisma.offer.update({
+        await prisma.promotion.update({
             where: { id },
             data: updateData
         });
@@ -307,7 +287,7 @@ exports.deleteOffer = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const offer = await prisma.offer.findUnique({ where: { id } });
+        const offer = await prisma.promotion.findUnique({ where: { id } });
 
         if (!offer) {
             return res.status(404).json({
@@ -316,7 +296,7 @@ exports.deleteOffer = async (req, res) => {
             });
         }
 
-        await prisma.offer.delete({ where: { id } });
+        await prisma.promotion.delete({ where: { id } });
 
         res.json({
             success: true,
@@ -337,7 +317,7 @@ exports.toggleOffer = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const offer = await prisma.offer.findUnique({ where: { id } });
+        const offer = await prisma.promotion.findUnique({ where: { id } });
 
         if (!offer) {
             return res.status(404).json({
@@ -346,7 +326,7 @@ exports.toggleOffer = async (req, res) => {
             });
         }
 
-        const updated = await prisma.offer.update({
+        const updated = await prisma.promotion.update({
             where: { id },
             data: { isActive: !offer.isActive }
         });

@@ -9,7 +9,7 @@ router.get('/active', onboardingController.getActiveOnboardingScreens);
 
 // Protected routes (admin only)
 router.use(protect);
-router.use(roleMiddleware('SUPER_ADMIN'));
+router.use(roleMiddleware('ADMIN'));
 
 router.get('/', onboardingController.getAllOnboardingScreens);
 router.get('/:id', onboardingController.getOnboardingScreenById);

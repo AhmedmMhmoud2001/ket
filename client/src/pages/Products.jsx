@@ -115,10 +115,10 @@ const Products = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {product.image ? (
+                                                {product.images && product.images.length > 0 ? (
                                                     <img
-                                                        src={product.image.startsWith('http') ? product.image : `http://localhost:5000${product.image}`}
-                                                        alt={product.name}
+                                                        src={product.images[0]?.imageUrl?.startsWith('http') ? product.images[0].imageUrl : `http://localhost:5000${product.images[0].imageUrl}`}
+                                                        alt={product.nameEn || product.nameAr}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
@@ -126,11 +126,14 @@ const Products = () => {
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-gray-900">{product.name}</div>
+                                                <div className="font-semibold text-gray-900">{product.nameEn || product.name}</div>
                                                 <div className="text-sm text-gray-500 truncate max-w-[200px] font-medium">{product.nameAr}</div>
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <TagIcon className="w-3 h-3 text-gray-400" />
-                                                    <span className="text-xs text-gray-500">{product.subcategory?.name || 'No Category'}</span>
+                                                    <span className="text-xs text-gray-500">{product.subcategory?.nameEn || product.subcategory?.name || 'No Category'}</span>
+                                                    {product.images && product.images.length > 0 && (
+                                                        <span className="text-xs text-gray-400">• {product.images.length} {product.images.length === 1 ? 'image' : 'images'}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

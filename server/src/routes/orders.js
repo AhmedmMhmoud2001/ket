@@ -18,4 +18,10 @@ router.patch('/:id/status', authorize('ADMIN', 'RESTAURANT_OWNER'), orderControl
 // Assign driver to order
 router.patch('/:id/assign-driver', authorize('ADMIN', 'RESTAURANT_OWNER'), orderController.assignDriver);
 
+// Cancel order
+router.patch('/:id/cancel', authorize('ADMIN', 'RESTAURANT_OWNER', 'CUSTOMER'), orderController.cancelOrder);
+
+// Reorder (Order Again)
+router.post('/:id/reorder', protect, orderController.reorder);
+
 module.exports = router;

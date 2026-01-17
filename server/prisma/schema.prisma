@@ -43,6 +43,12 @@ model User {
   payments      Payment[]
   activityLogs  ActivityLog[]
   couponUsages  CouponUsage[]
+  userPoints    UserPoints?
+  pointsTransactions PointsTransaction[]
+  cart          Cart?
+  orderStatusHistory OrderStatusHistory[]
+  notifications Notification[]
+  paymentMethods PaymentMethod[]
 
   @@index([email])
   @@index([phone])
@@ -68,16 +74,27 @@ model UserRole {
 }
 
 model UserAddress {
-  id        String  @id @default(uuid())
-  userId    String
-  address   String
-  lat       Float
-  lng       Float
-  isDefault Boolean @default(false)
+  id          String   @id @default(uuid())
+  userId      String
+  type        String?  // 'home', 'work', 'office', 'other'
+  label       String?  // e.g., "شقة", "مكتب"
+  address     String
+  lat         Float
+  lng         Float
+  phone       String?  // Optional phone for this address
+  building    String?
+  floor       String?
+  apartment   String?
+  notes       String?  @db.Text
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([isDefault])
+  @@index([type])
 }
 
 //////////////////////////////////
@@ -89,6 +106,7 @@ model Category {
   nameAr    String
   nameEn    String
   type      String
+  imageUrl  String?
   isActive  Boolean @default(true)
 
   restaurants Restaurant[]
@@ -102,6 +120,7 @@ model Restaurant {
   categoryId    String
   ownerId       String
   adminId       String?  @unique
+  imageUrl      String?
 
   nameAr        String
   nameEn        String
@@ -124,6 +143,9 @@ model Restaurant {
   coupons        Coupon[]
   deliveryDrivers DeliveryDriver[]
   favorites      FavoriteRestaurant[]
+  hours          RestaurantHours[]
+  deliveryZones  DeliveryZone[]
+  deliveryTimeEstimate DeliveryTimeEstimate?
 
   @@index([categoryId])
   @@index([ownerId])
@@ -153,6 +175,8 @@ model Product {
   descriptionEn String? @db.Text
   price         Float
   calories      Int?
+  cookingTime   Int?    // Cooking time in minutes (e.g., 15-20)
+  nutritionInfo Json?   // Extended nutrition information (e.g., {protein: 20g, carbs: 50g, fat: 10g})
   rating        Float   @default(0)
   isAvailable   Boolean @default(true)
 
@@ -163,6 +187,8 @@ model Product {
   orderItems     FoodOrderItem[]
   promotionLinks PromotionProduct[]
   favoriteBy     FavoriteProduct[]
+  images         ProductImage[]
+  cartItems      CartItem[]
 
   @@index([restaurantId])
   @@index([subcategoryId])
@@ -186,6 +212,23 @@ model ProductOption {
 // FOOD DELIVERY
 //////////////////////////////////
 
+model OrderStatusHistory {
+  id          String   @id @default(uuid())
+  orderId     String
+  status      String
+  userId      String?  // Who changed the status
+  notes       String?  @db.Text
+  expectedAt  DateTime? // Expected completion time
+  createdAt   DateTime @default(now())
+
+  order FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 model DeliveryDriver {
   id               String  @id @default(uuid())
   userId           String  @unique
@@ -194,13 +237,33 @@ model DeliveryDriver {
   isOnline         Boolean @default(false)
   rating           Float   @default(0)
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant?    @relation(fields: [restaurantId], references: [id])
   orders     FoodOrder[]
+  location   DriverLocation?
 
   @@index([userId])
   @@index([restaurantId])
   @@index([isOnline])
+}
+
+//////////////////////////////////
+// DRIVER LOCATION
+//////////////////////////////////
+
+model DriverLocation {
+  id        String   @id @default(uuid())
+  driverId  String   @unique
+  lat       Float
+  lng       Float
+  heading   Float?   // Compass heading in degrees
+  speed     Float?   // Speed in km/h
+  updatedAt DateTime @updatedAt
+
+  driver DeliveryDriver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([driverId])
+  @@index([updatedAt])
 }
 
 model FoodOrder {
@@ -212,6 +275,10 @@ model FoodOrder {
   status       String
   totalPrice   Float
   tip          Float?
+  notes        String?  @db.Text
+  cancelledAt   DateTime?
+  cancelReason  String?
+  cancelledBy   String?  // 'customer', 'restaurant', 'admin'
   createdAt    DateTime @default(now())
 
   user       User            @relation(fields: [userId], references: [id])
@@ -221,12 +288,16 @@ model FoodOrder {
   items   FoodOrderItem[]
   chat    Chat?
   coupons CouponUsage[]
+  pointsTransactions PointsTransaction[]
+  statusHistory OrderStatusHistory[]
+  notifications Notification[]
 
   @@index([userId])
   @@index([restaurantId])
   @@index([driverId])
   @@index([status])
   @@index([createdAt])
+  @@index([cancelledAt])
 }
 
 model FoodOrderItem {
@@ -379,7 +450,7 @@ model PromotionProduct {
 
   @@unique([promotionId, productId])
 }
-
+  
 model Coupon {
   id             String   @id @default(uuid())
   restaurantId   String
@@ -489,6 +560,7 @@ model Payment {
   amount    Float
   method    String
   status    String
+  paymentMethodId String? // Reference to saved payment method
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -496,6 +568,56 @@ model Payment {
   @@index([userId])
   @@index([orderType, orderId])
   @@index([status])
+  @@index([paymentMethodId])
+}
+
+//////////////////////////////////
+// NOTIFICATIONS
+//////////////////////////////////
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // 'order', 'status', 'promotion', 'system', 'payment'
+  title     String
+  message   String   @db.Text
+  data      Json?    // Additional data
+  isRead    Boolean  @default(false)
+  orderId   String?  // Related order if applicable
+  createdAt DateTime @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order FoodOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@index([orderId])
+}
+
+//////////////////////////////////
+// PAYMENT METHODS
+//////////////////////////////////
+
+model PaymentMethod {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String   // 'card', 'wallet', 'cash', 'google_pay', 'k_net'
+  provider    String?  // 'visa', 'mastercard', 'google_pay', 'k_net'
+  last4       String?  // Last 4 digits for cards
+  expiryMonth Int?
+  expiryYear  Int?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDefault])
+  @@index([type])
 }
 
 model ActivityLog {
@@ -512,4 +634,223 @@ model ActivityLog {
   @@index([entityType, entityId])
   @@index([action])
   @@index([createdAt])
+}
+
+//////////////////////////////////
+// PRODUCT IMAGES
+//////////////////////////////////
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  imageUrl  String
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isPrimary])
+}
+
+//////////////////////////////////
+// SPLASH SCREENS
+//////////////////////////////////
+
+model SplashScreen {
+  id        String   @id @default(uuid())
+  image     String
+  duration  Int      @default(3000) // milliseconds
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+//////////////////////////////////
+// ONBOARDING SCREENS
+//////////////////////////////////
+
+model OnboardingScreen {
+  id          String   @id @default(uuid())
+  title       String
+  titleAr     String?
+  description String   @db.Text
+  descriptionAr String? @db.Text
+  image       String
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+//////////////////////////////////
+// CONTENT PAGES
+//////////////////////////////////
+
+model PrivacyPolicy {
+  id        String   @id @default(uuid())
+  contentEn String   @db.Text
+  contentAr String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TermsOfService {
+  id        String   @id @default(uuid())
+  contentEn String   @db.Text
+  contentAr String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AboutApp {
+  id            String   @id @default(uuid())
+  titleEn       String?
+  titleAr       String?
+  descriptionEn String?  @db.Text
+  descriptionAr String?  @db.Text
+  version       String?
+  imageEn       String?
+  imageAr       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+//////////////////////////////////
+// POINTS & REWARDS SYSTEM
+//////////////////////////////////
+
+model UserPoints {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  points       Int      @default(0)
+  earnedPoints Int      @default(0)
+  usedPoints   Int      @default(0)
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PointsTransaction {
+  id          String    @id @default(uuid())
+  userId      String
+  orderId     String?
+  points      Int
+  type        String    // 'earned', 'used', 'expired', 'reward', 'bonus'
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order FoodOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+//////////////////////////////////
+// DELIVERY ZONES
+//////////////////////////////////
+
+model DeliveryZone {
+  id          String   @id @default(uuid())
+  restaurantId String
+  name        String
+  coordinates Json     // Polygon coordinates [{lat, lng}, ...]
+  isActive    Boolean  @default(true)
+  fee         Float?   // Delivery fee for this zone
+  minOrder    Float?   // Minimum order for this zone
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+  @@index([isActive])
+}
+
+//////////////////////////////////
+// DELIVERY TIME ESTIMATION
+//////////////////////////////////
+
+model DeliveryTimeEstimate {
+  id            String   @id @default(uuid())
+  restaurantId  String   @unique
+  baseTime      Int      // Base minutes
+  perKmTime     Int?     // Additional minutes per km
+  busyTimeAdd   Int?     // Additional minutes during busy hours
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+}
+
+//////////////////////////////////
+// RESTAURANT HOURS
+//////////////////////////////////
+
+model RestaurantHours {
+  id          String   @id @default(uuid())
+  restaurantId String
+  dayOfWeek   Int      // 0-6 (Sunday-Saturday)
+  openTime    String   // e.g., "09:00"
+  closeTime   String   // e.g., "22:00"
+  isOpen      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, dayOfWeek])
+  @@index([restaurantId])
+  @@index([dayOfWeek])
+}
+
+//////////////////////////////////
+// SHOPPING CART
+//////////////////////////////////
+
+model Cart {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@index([userId])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  options   Json?    // Selected product options
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
 }

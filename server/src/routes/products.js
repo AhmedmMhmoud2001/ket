@@ -21,4 +21,10 @@ router.put('/:id', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.upd
 // Delete product
 router.delete('/:id', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.deleteProduct);
 
+// Product images routes
+router.post('/:id/images', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.addProductImage);
+router.delete('/:id/images/:imageId', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.deleteProductImage);
+router.patch('/:id/images/:imageId/primary', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.setPrimaryImage);
+router.patch('/:id/images/:imageId/sort', authorize('ADMIN', 'RESTAURANT_OWNER'), productController.updateImageSortOrder);
+
 module.exports = router;

@@ -19,14 +19,20 @@ import {
     PieChart,
     Pie,
     Cell,
-    Legend
+    Legend,
+    BarChart,
+    Bar,
+    LineChart,
+    Line
 } from 'recharts';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 const KPICard = ({ title, value, change, icon: Icon, color, subValue }) => {
+    const { t, i18n } = useTranslation();
     const isPositive = change >= 0;
+    const isRTL = i18n.language === 'ar';
 
     const colorClasses = {
         blue: 'bg-blue-50 text-blue-600',
@@ -37,8 +43,8 @@ const KPICard = ({ title, value, change, icon: Icon, color, subValue }) => {
 
     return (
         <div className="card">
-            <div className="flex items-start justify-between">
-                <div>
+            <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={isRTL ? 'text-right' : ''}>
                     <p className="text-sm font-medium text-gray-500">{title}</p>
                     <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
                     {subValue && <p className="text-xs text-gray-400 mt-1">{subValue}</p>}
@@ -47,25 +53,28 @@ const KPICard = ({ title, value, change, icon: Icon, color, subValue }) => {
                     <Icon className="w-6 h-6" />
                 </div>
             </div>
-            <div className="mt-4 flex items-center">
+            <div className={`mt-4 flex items-center ${isRTL ? 'flex-row-reverse space-x-reverse space-x-2' : 'space-x-2'}`}>
                 <span className={`flex items-center text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    {isPositive ? <ArrowUpIcon className="w-4 h-4 mr-1" /> : <ArrowDownIcon className="w-4 h-4 mr-1" />}
+                    {isPositive ? <ArrowUpIcon className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} /> : <ArrowDownIcon className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
                     {Math.abs(change)}%
                 </span>
-                <span className="text-sm text-gray-500 ml-2">vs last period</span>
+                <span className="text-sm text-gray-500">{t('dashboard.vsLastPeriod')}</span>
             </div>
         </div>
     );
 };
 
 const Dashboard = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === 'ar';
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState(null);
     const [chartData, setChartData] = useState([]);
     const [activeOrders, setActiveOrders] = useState([]);
     const [orderSources, setOrderSources] = useState([]);
     const [recentActivities, setRecentActivities] = useState([]);
+    const [orderStatusData, setOrderStatusData] = useState([]);
+    const [orderTrendsData, setOrderTrendsData] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -101,9 +110,25 @@ const Dashboard = () => {
 
                 setRecentActivities(activitiesRes.data.data);
 
+                // Process order status distribution
+                if (ordersRes.data.data.order_statuses) {
+                    setOrderStatusData(ordersRes.data.data.order_statuses.map(s => ({
+                        name: s.name.charAt(0).toUpperCase() + s.name.slice(1).replace(/_/g, ' '),
+                        value: s.value
+                    })));
+                }
+
+                // Process order trends (use chart data as trends)
+                if (chartRes.data.data && chartRes.data.data.length > 0) {
+                    setOrderTrendsData(chartRes.data.data.map(item => ({
+                        date: item.date,
+                        orders: item.orders || Math.floor(item.revenue / 50) // Mock orders if not available
+                    })));
+                }
+
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
-                toast.error('Failed to load dashboard data');
+                toast.error(t('dashboard.failedToLoad'));
             } finally {
                 setLoading(false);
             }
@@ -128,10 +153,10 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.overview')}</h1>
                 <div className="text-sm text-gray-500">
-                    Last updated: {new Date().toLocaleTimeString()}
+                    {t('dashboard.lastUpdated')}: {new Date().toLocaleTimeString()}
                 </div>
             </div>
 
@@ -139,44 +164,103 @@ const Dashboard = () => {
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <KPICard
-                        title="Total Revenue"
+                        title={t('dashboard.totalRevenue')}
                         value={`$${stats.revenue.value.toLocaleString()}`}
                         change={stats.revenue.change}
                         icon={CurrencyDollarIcon}
                         color="green"
                     />
                     <KPICard
-                        title="Total Orders"
+                        title={t('dashboard.totalOrders')}
                         value={stats.orders.value}
                         change={stats.orders.change}
                         icon={ShoppingBagIcon}
                         color="blue"
                     />
                     <KPICard
-                        title="Total Customers"
+                        title={t('dashboard.totalCustomers')}
                         value={stats.customers.value}
                         change={stats.customers.change}
                         icon={UserGroupIcon}
                         color="purple"
                     />
                     <KPICard
-                        title="Active Drivers"
+                        title={t('dashboard.activeDrivers')}
                         value={stats.active_drivers.value}
                         change={0} // Driver change not implemented yet
-                        subValue="Online & Working"
+                        subValue={t('dashboard.onlineWorking')}
                         icon={TruckIcon}
                         color="orange"
                     />
                 </div>
             )}
 
+            {/* Additional Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Order Status Distribution (Bar Chart) */}
+                <div className="card">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Order Status Distribution</h2>
+                    <div className="h-80 min-h-0">
+                        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                            <BarChart data={orderStatusData.length > 0 ? orderStatusData : [{ name: 'No Data', value: 0 }]}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                <YAxis axisLine={false} tickLine={false} />
+                                <Tooltip />
+                                <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Order Trends (Line Chart) */}
+                <div className="card">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Order Trends (7 Days)</h2>
+                    <div className="h-80 min-h-0">
+                        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                            <LineChart data={orderTrendsData.length > 0 ? orderTrendsData : []}>
+                                <defs>
+                                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis 
+                                    dataKey="date" 
+                                    axisLine={false} 
+                                    tickLine={false}
+                                    tickFormatter={(str) => {
+                                        const date = new Date(str);
+                                        return `${date.getDate()}/${date.getMonth() + 1}`;
+                                    }}
+                                />
+                                <YAxis axisLine={false} tickLine={false} />
+                                <Tooltip
+                                    formatter={(value) => [value, 'Orders']}
+                                    labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="orders" 
+                                    stroke="#3b82f6" 
+                                    strokeWidth={2}
+                                    dot={{ fill: '#3b82f6', r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                     {/* Revenue Chart */}
                     <div className="card">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">Revenue Analytics (Last 7 Days)</h2>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.revenueAnalytics')}</h2>
+                        <div className="h-80 min-h-0">
+                            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -196,7 +280,7 @@ const Dashboard = () => {
                                     />
                                     <YAxis axisLine={false} tickLine={false} />
                                     <Tooltip
-                                        formatter={(value) => [`$${value}`, 'Revenue']}
+                                        formatter={(value) => [`$${value}`, t('dashboard.totalRevenue')]}
                                         labelFormatter={(label) => new Date(label).toLocaleDateString()}
                                     />
                                     <Area
@@ -214,24 +298,24 @@ const Dashboard = () => {
                     {/* Active Orders Table */}
                     <div className="card">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">Active Orders Status</h2>
-                            <Link to="/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">View All</Link>
+                            <h2 className="text-lg font-bold text-gray-900">{t('dashboard.activeOrdersStatus')}</h2>
+                            <Link to="/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">{t('dashboard.viewAll')}</Link>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
                                     <tr>
-                                        <th className="px-4 py-3 font-medium">Order ID</th>
-                                        <th className="px-4 py-3 font-medium">Customer</th>
-                                        <th className="px-4 py-3 font-medium">Status</th>
-                                        <th className="px-4 py-3 font-medium">Driver</th>
-                                        <th className="px-4 py-3 font-medium">Time</th>
+                                        <th className="px-4 py-3 font-medium">{t('dashboard.orderId')}</th>
+                                        <th className="px-4 py-3 font-medium">{t('dashboard.customer')}</th>
+                                        <th className="px-4 py-3 font-medium">{t('common.status')}</th>
+                                        <th className="px-4 py-3 font-medium">{t('dashboard.driver')}</th>
+                                        <th className="px-4 py-3 font-medium">{t('dashboard.time')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {activeOrders.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="px-4 py-4 text-center text-gray-500">No active orders right now.</td>
+                                            <td colSpan="5" className="px-4 py-4 text-center text-gray-500">{t('dashboard.noActiveOrders')}</td>
                                         </tr>
                                     ) : (
                                         activeOrders.map((order) => (
@@ -245,10 +329,10 @@ const Dashboard = () => {
                                                                     order.status === 'delivered' ? 'bg-green-100 text-green-600' :
                                                                         'bg-gray-100 text-gray-600'
                                                         }`}>
-                                                        {order.status.replace(/_/g, ' ')}
+                                                        {t(`orders.${order.status === 'on_the_way' ? 'onTheWay' : order.status}`) || order.status.replace(/_/g, ' ')}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{order.driver_name || 'Unassigned'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{order.driver_name || t('dashboard.unassigned')}</td>
                                                 <td className="px-4 py-3 text-xs text-gray-500">
                                                     {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </td>
@@ -265,9 +349,9 @@ const Dashboard = () => {
                 <div className="space-y-6">
                     {/* Order Sources (Pie Chart) */}
                     <div className="card flex flex-col items-center justify-center">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 w-full text-left">Payment Methods</h2>
-                        <div className="h-64 w-full relative">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 w-full text-left">{t('dashboard.paymentMethods')}</h2>
+                        <div className="h-64 w-full relative min-h-0">
+                            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
                                 <PieChart>
                                     <Pie
                                         data={orderSources}
@@ -290,21 +374,21 @@ const Dashboard = () => {
                                 <p className="text-3xl font-bold text-gray-900">
                                     {orderSources.reduce((acc, curr) => acc + curr.value, 0)}
                                 </p>
-                                <p className="text-xs text-gray-500 uppercase font-semibold">Total</p>
+                                <p className="text-xs text-gray-500 uppercase font-semibold">{t('dashboard.total')}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Recent Notifications */}
                     <div className="card">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h2>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.recentActivity')}</h2>
                         <div className="space-y-4">
                             {recentActivities.length === 0 ? (
-                                <p className="text-gray-500 text-center py-4">No recent activity.</p>
+                                <p className="text-gray-500 text-center py-4">{t('dashboard.noRecentActivity')}</p>
                             ) : (
                                 recentActivities.map((activity, index) => (
-                                    <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
-                                        <div className="flex items-center space-x-3">
+                                        <div key={index} className={`flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                            <div className={`flex items-center ${isRTL ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
                                             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                                                 <ShoppingBagIcon className="w-5 h-5 text-gray-600" />
                                             </div>
@@ -322,7 +406,7 @@ const Dashboard = () => {
                             )}
                         </div>
                         <Link to="/orders" className="block w-full btn btn-secondary mt-4 text-sm text-center">
-                            View All Activity
+                            {t('dashboard.viewAllActivity')}
                         </Link>
                     </div>
                 </div>

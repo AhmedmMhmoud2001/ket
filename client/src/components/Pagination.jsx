@@ -1,18 +1,24 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage }) => {
-    const startItem = (currentPage - 1) * itemsPerPage + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    // Ensure all values are numbers and not NaN
+    const current = parseInt(currentPage) || 1;
+    const total = parseInt(totalPages) || 0;
+    const totalItemsNum = parseInt(totalItems) || 0;
+    const itemsPerPageNum = parseInt(itemsPerPage) || 10;
+    
+    const startItem = (current - 1) * itemsPerPageNum + 1;
+    const endItem = Math.min(current * itemsPerPageNum, totalItemsNum);
 
     const handlePrevious = () => {
-        if (currentPage > 1) {
-            onPageChange(currentPage - 1);
+        if (current > 1) {
+            onPageChange(current - 1);
         }
     };
 
     const handleNext = () => {
-        if (currentPage < totalPages) {
-            onPageChange(currentPage + 1);
+        if (current < total) {
+            onPageChange(current + 1);
         }
     };
 
@@ -20,48 +26,48 @@ const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPe
         const pages = [];
         const maxVisible = 5;
 
-        if (totalPages <= maxVisible) {
-            for (let i = 1; i <= totalPages; i++) {
+        if (total <= maxVisible) {
+            for (let i = 1; i <= total; i++) {
                 pages.push(i);
             }
         } else {
-            if (currentPage <= 3) {
+            if (current <= 3) {
                 for (let i = 1; i <= 4; i++) pages.push(i);
                 pages.push('...');
-                pages.push(totalPages);
-            } else if (currentPage >= totalPages - 2) {
+                pages.push(total);
+            } else if (current >= total - 2) {
                 pages.push(1);
                 pages.push('...');
-                for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+                for (let i = total - 3; i <= total; i++) pages.push(i);
             } else {
                 pages.push(1);
                 pages.push('...');
-                pages.push(currentPage - 1);
-                pages.push(currentPage);
-                pages.push(currentPage + 1);
+                pages.push(current - 1);
+                pages.push(current);
+                pages.push(current + 1);
                 pages.push('...');
-                pages.push(totalPages);
+                pages.push(total);
             }
         }
 
         return pages;
     };
 
-    if (totalPages <= 1) return null;
+    if (total <= 1) return null;
 
     return (
         <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
             <div className="flex flex-1 justify-between sm:hidden">
                 <button
                     onClick={handlePrevious}
-                    disabled={currentPage === 1}
+                    disabled={current === 1}
                     className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Previous
                 </button>
                 <button
                     onClick={handleNext}
-                    disabled={currentPage === totalPages}
+                    disabled={current === total}
                     className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Next
@@ -79,7 +85,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPe
                     <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                         <button
                             onClick={handlePrevious}
-                            disabled={currentPage === 1}
+                            disabled={current === 1}
                             className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span className="sr-only">Previous</span>
@@ -97,7 +103,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPe
                                 <button
                                     key={page}
                                     onClick={() => onPageChange(page)}
-                                    className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${currentPage === page
+                                    className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${current === page
                                             ? 'z-10 bg-primary-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
                                             : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
                                         }`}
@@ -108,7 +114,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPe
                         ))}
                         <button
                             onClick={handleNext}
-                            disabled={currentPage === totalPages}
+                            disabled={current === total}
                             className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span className="sr-only">Next</span>

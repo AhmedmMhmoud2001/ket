@@ -11,8 +11,7 @@ exports.getAllCoupons = async (req, res) => {
 
         if (search) {
             where.OR = [
-                { code: { contains: search } },
-                { description: { contains: search } }
+                { code: { contains: search } }
             ];
         }
 
@@ -23,7 +22,7 @@ exports.getAllCoupons = async (req, res) => {
         const [coupons, total] = await Promise.all([
             prisma.coupon.findMany({
                 where,
-                orderBy: { createdAt: 'desc' },
+                orderBy: { id: 'desc' },
                 skip,
                 take
             }),

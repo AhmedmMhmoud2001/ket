@@ -9,7 +9,7 @@ router.get('/active', splashController.getActiveSplashScreens);
 
 // Protected routes (admin only)
 router.use(protect);
-router.use(roleMiddleware('SUPER_ADMIN'));
+router.use(roleMiddleware('ADMIN'));
 
 router.get('/', splashController.getAllSplashScreens);
 router.get('/:id', splashController.getSplashScreenById);

@@ -45,7 +45,16 @@
     "previous": "السابق",
     "english": "الإنجليزية",
     "arabic": "العربية",
-    "language": "اللغة"
+    "language": "اللغة",
+    "shippingAgents": "وكلاء الشحن",
+    "shippingOrders": "طلبات الشحن",
+    "splash": "شاشة البداية",
+    "onboarding": "التعريف",
+    "privacy": "سياسة الخصوصية",
+    "terms": "شروط الخدمة",
+    "about": "عن التطبيق",
+    "view": "عرض",
+    "points": "النقاط"
   },
   "forms": {
     "name": "الاسم",
@@ -85,6 +94,8 @@
   },
   "dashboard": {
     "title": "لوحة التحكم",
+    "overview": "نظرة عامة على لوحة التحكم",
+    "lastUpdated": "آخر تحديث",
     "totalRevenue": "إجمالي الإيرادات",
     "totalOrders": "إجمالي الطلبات",
     "totalCustomers": "إجمالي العملاء",
@@ -92,10 +103,23 @@
     "onlineWorking": "متصل ويعمل",
     "vsLastPeriod": "مقارنة بالفترة السابقة",
     "revenueChart": "رسم الإيرادات",
+    "revenueAnalytics": "تحليل الإيرادات (آخر 7 أيام)",
     "orderSources": "مصادر الطلبات",
+    "paymentMethods": "طرق الدفع",
     "activeOrders": "الطلبات النشطة",
+    "activeOrdersStatus": "حالة الطلبات النشطة",
     "recentActivity": "النشاط الأخير",
-    "viewAllActivity": "عرض كل النشاط"
+    "viewAllActivity": "عرض كل النشاط",
+    "viewAll": "عرض الكل",
+    "noActiveOrders": "لا توجد طلبات نشطة في الوقت الحالي.",
+    "noRecentActivity": "لا يوجد نشاط حديث.",
+    "orderId": "رقم الطلب",
+    "customer": "العميل",
+    "driver": "السائق",
+    "time": "الوقت",
+    "unassigned": "غير مخصص",
+    "total": "الإجمالي",
+    "failedToLoad": "فشل تحميل بيانات لوحة التحكم"
   },
   "restaurants": {
     "title": "المطاعم",
@@ -109,7 +133,10 @@
     "addProduct": "إضافة منتج",
     "editProduct": "تعديل منتج",
     "productDetails": "تفاصيل المنتج",
-    "noProducts": "لا توجد منتجات"
+    "product": "المنتج",
+    "price": "السعر",
+    "noProducts": "لا توجد منتجات",
+    "noProductsFound": "لا توجد منتجات."
   },
   "categories": {
     "title": "الفئات",
@@ -155,7 +182,16 @@
     "status": "الحالة",
     "paymentStatus": "حالة الدفع",
     "date": "التاريخ",
-    "noOrders": "لا توجد طلبات"
+    "noOrders": "لا توجد طلبات",
+    "paid": "مدفوع",
+    "pending": "قيد الانتظار",
+    "failed": "فشل",
+    "view": "عرض",
+    "preparing": "قيد التحضير",
+    "ready": "جاهز",
+    "onTheWay": "في الطريق",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
   },
   "users": {
     "title": "المستخدمون",
@@ -164,6 +200,8 @@
     "userDetails": "تفاصيل المستخدم",
     "fullName": "الاسم الكامل",
     "role": "الدور",
+    "roles": "الأدوار",
+    "joinedAt": "تاريخ الانضمام",
     "noUsers": "لا يوجد مستخدمون"
   },
   "drivers": {
@@ -171,6 +209,10 @@
     "addDriver": "إضافة سائق",
     "editDriver": "تعديل سائق",
     "driverDetails": "تفاصيل السائق",
+    "vehicle": "المركبة",
+    "rating": "التقييم",
+    "totalDeliveries": "إجمالي التوصيلات",
+    "location": "الموقع",
     "noDrivers": "لا يوجد سائقون"
   },
   "auth": {

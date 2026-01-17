@@ -38,20 +38,26 @@ exports.getAvailablePermissions = async (req, res) => {
 // Get all roles with their permissions
 exports.getAllRoles = async (req, res) => {
     try {
-        // Since roles are enum in Prisma, we'll return a hardcoded list with descriptions
-        // In a real-world scenario, you might want to create a separate Role table
-        const roles = [
-            {
-                id: 'SUPER_ADMIN',
-                name: 'Super Admin',
+        // Get all roles from database
+        const dbRoles = await prisma.role.findMany({
+            include: {
+                _count: {
+                    select: { users: true }
+                }
+            },
+            orderBy: { id: 'asc' }
+        });
+
+        // Create role definitions with permissions
+        const roleDefinitions = {
+            'ADMIN': {
+                name: 'Admin',
                 description: 'Full system access with all permissions',
                 permissions: AVAILABLE_PERMISSIONS,
-                isSystem: true, // Cannot be deleted
-                userCount: await prisma.user.count({ where: { role: 'SUPER_ADMIN' } })
+                isSystem: true
             },
-            {
-                id: 'RESTAURANT_MANAGER',
-                name: 'Restaurant Manager',
+            'RESTAURANT_OWNER': {
+                name: 'Restaurant Owner',
                 description: 'Manage restaurant menus, orders, and products',
                 permissions: {
                     restaurants: ['view', 'edit'],
@@ -62,56 +68,43 @@ exports.getAllRoles = async (req, res) => {
                     reviews: ['view', 'respond'],
                     reports: ['view']
                 },
-                isSystem: true,
-                userCount: await prisma.user.count({ where: { role: 'RESTAURANT_MANAGER' } })
+                isSystem: true
             },
-            {
-                id: 'SUPPORT_AGENT',
-                name: 'Support Agent',
-                description: 'Handle customer support and inquiries',
-                permissions: {
-                    users: ['view'],
-                    orders: ['view'],
-                    support: ['view', 'respond', 'close'],
-                    reviews: ['view']
-                },
-                isSystem: true,
-                userCount: await prisma.user.count({ where: { role: 'SUPPORT_AGENT' } })
-            },
-            {
-                id: 'ANALYST',
-                name: 'Analyst',
-                description: 'View reports and analytics',
-                permissions: {
-                    users: ['view'],
-                    restaurants: ['view'],
-                    products: ['view'],
-                    orders: ['view'],
-                    reports: ['view', 'export'],
-                    logs: ['view']
-                },
-                isSystem: true,
-                userCount: await prisma.user.count({ where: { role: 'ANALYST' } })
-            },
-            {
-                id: 'CUSTOMER',
-                name: 'Customer',
-                description: 'Regular customer with basic access',
-                permissions: {},
-                isSystem: true,
-                userCount: await prisma.user.count({ where: { role: 'CUSTOMER' } })
-            },
-            {
-                id: 'DRIVER',
+            'DRIVER': {
                 name: 'Driver',
                 description: 'Delivery driver',
                 permissions: {
                     orders: ['view', 'manage_status']
                 },
-                isSystem: true,
-                userCount: await prisma.user.count({ where: { role: 'DRIVER' } })
+                isSystem: true
+            },
+            'CUSTOMER': {
+                name: 'Customer',
+                description: 'Regular customer with basic access',
+                permissions: {},
+                isSystem: true
             }
-        ];
+        };
+
+        // Map database roles to our definitions
+        const roles = dbRoles.map(dbRole => {
+            const roleName = dbRole.name.toUpperCase();
+            const definition = roleDefinitions[roleName] || {
+                name: dbRole.name,
+                description: `${dbRole.name} role`,
+                permissions: {},
+                isSystem: false
+            };
+
+            return {
+                id: dbRole.id.toString(),
+                name: dbRole.name,
+                description: definition.description,
+                permissions: definition.permissions,
+                isSystem: definition.isSystem,
+                userCount: dbRole._count?.users || 0
+            };
+        });
 
         res.json({
             success: true,
@@ -132,18 +125,34 @@ exports.getRoleById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Find the role definition
+        // Find role in database - try by ID first, then by name
+        const roleId = parseInt(id);
+        const roleRecord = await prisma.role.findFirst({
+            where: roleId ? { id: roleId } : { name: { equals: id, mode: 'insensitive' } },
+            include: {
+                _count: {
+                    select: { users: true }
+                }
+            }
+        });
+
+        if (!roleRecord) {
+            return res.status(404).json({
+                success: false,
+                message: 'Role not found'
+            });
+        }
+
+        // Get role definition
         const roleDefinitions = {
-            'SUPER_ADMIN': {
-                id: 'SUPER_ADMIN',
-                name: 'Super Admin',
+            'ADMIN': {
+                name: 'Admin',
                 description: 'Full system access with all permissions',
                 permissions: AVAILABLE_PERMISSIONS,
                 isSystem: true
             },
-            'RESTAURANT_MANAGER': {
-                id: 'RESTAURANT_MANAGER',
-                name: 'Restaurant Manager',
+            'RESTAURANT_OWNER': {
+                name: 'Restaurant Owner',
                 description: 'Manage restaurant menus, orders, and products',
                 permissions: {
                     restaurants: ['view', 'edit'],
@@ -156,62 +165,38 @@ exports.getRoleById = async (req, res) => {
                 },
                 isSystem: true
             },
-            'SUPPORT_AGENT': {
-                id: 'SUPPORT_AGENT',
-                name: 'Support Agent',
-                description: 'Handle customer support and inquiries',
-                permissions: {
-                    users: ['view'],
-                    orders: ['view'],
-                    support: ['view', 'respond', 'close'],
-                    reviews: ['view']
-                },
-                isSystem: true
-            },
-            'ANALYST': {
-                id: 'ANALYST',
-                name: 'Analyst',
-                description: 'View reports and analytics',
-                permissions: {
-                    users: ['view'],
-                    restaurants: ['view'],
-                    products: ['view'],
-                    orders: ['view'],
-                    reports: ['view', 'export'],
-                    logs: ['view']
-                },
-                isSystem: true
-            },
-            'CUSTOMER': {
-                id: 'CUSTOMER',
-                name: 'Customer',
-                description: 'Regular customer with basic access',
-                permissions: {},
-                isSystem: true
-            },
             'DRIVER': {
-                id: 'DRIVER',
                 name: 'Driver',
                 description: 'Delivery driver',
                 permissions: {
                     orders: ['view', 'manage_status']
                 },
                 isSystem: true
+            },
+            'CUSTOMER': {
+                name: 'Customer',
+                description: 'Regular customer with basic access',
+                permissions: {},
+                isSystem: true
             }
         };
 
-        const role = roleDefinitions[id];
+        const roleName = roleRecord.name.toUpperCase();
+        const definition = roleDefinitions[roleName] || {
+            name: roleRecord.name,
+            description: `${roleRecord.name} role`,
+            permissions: {},
+            isSystem: false
+        };
 
-        if (!role) {
-            return res.status(404).json({
-                success: false,
-                message: 'Role not found'
-            });
-        }
-
-        // Get user count for this role
-        const userCount = await prisma.user.count({ where: { role: id } });
-        role.userCount = userCount;
+        const role = {
+            id: roleRecord.id.toString(),
+            name: roleRecord.name,
+            description: definition.description,
+            permissions: definition.permissions,
+            isSystem: definition.isSystem,
+            userCount: roleRecord._count?.users || 0
+        };
 
         res.json({
             success: true,
@@ -236,31 +221,64 @@ exports.getUsersByRole = async (req, res) => {
         const skip = (page - 1) * limit;
         const take = parseInt(limit);
 
+        // Find role by ID or name
+        const roleRecord = await prisma.role.findFirst({
+            where: {
+                OR: [
+                    { id: parseInt(role) || -1 },
+                    { name: role.toUpperCase() }
+                ]
+            }
+        });
+
+        if (!roleRecord) {
+            return res.status(404).json({
+                success: false,
+                message: 'Role not found'
+            });
+        }
+
         const [users, total] = await Promise.all([
             prisma.user.findMany({
-                where: { role: role },
+                where: {
+                    roles: {
+                        some: {
+                            roleId: roleRecord.id
+                        }
+                    }
+                },
                 select: {
                     id: true,
-                    firstName: true,
-                    lastName: true,
+                    name: true,
                     email: true,
                     phone: true,
-                    avatar: true,
-                    role: true,
-                    status: true,
-                    createdAt: true
+                    isActive: true,
+                    createdAt: true,
+                    roles: {
+                        include: {
+                            role: true
+                        }
+                    }
                 },
                 skip,
                 take,
                 orderBy: { createdAt: 'desc' }
             }),
-            prisma.user.count({ where: { role: role } })
+            prisma.user.count({
+                where: {
+                    roles: {
+                        some: {
+                            roleId: roleRecord.id
+                        }
+                    }
+                }
+            })
         ]);
 
-        // Format users with full_name
+        // Format users
         const formattedUsers = users.map(user => ({
             ...user,
-            full_name: `${user.firstName || ''} ${user.lastName || ''}`.trim()
+            full_name: user.name
         }));
 
         res.json({
