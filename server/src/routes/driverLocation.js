@@ -17,3 +17,4 @@ router.get('/', authorize('ADMIN', 'RESTAURANT_OWNER', 'SUPER_ADMIN'), driverLoc
 
 module.exports = router;
 
+

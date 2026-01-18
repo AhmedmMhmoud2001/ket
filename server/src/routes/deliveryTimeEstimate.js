@@ -17,3 +17,4 @@ router.put('/restaurant/:restaurantId', authorize('ADMIN', 'RESTAURANT_OWNER'), 
 
 module.exports = router;
 
+
