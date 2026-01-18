@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const crypto = require('crypto');
 
 // Privacy Policy
 exports.getPrivacyPolicy = async (req, res) => {
@@ -49,15 +50,18 @@ exports.createOrUpdatePrivacyPolicy = async (req, res) => {
                 where: { id: privacy.id },
                 data: {
                     contentEn: contentEn || privacy.contentEn,
-                    contentAr: contentAr || privacy.contentAr
+                    contentAr: contentAr || privacy.contentAr,
+                    updatedAt: new Date()
                 }
             });
         } else {
             // Create new
             privacy = await prisma.privacyPolicy.create({
                 data: {
+                    id: crypto.randomUUID(),
                     contentEn: contentEn || '',
-                    contentAr: contentAr || ''
+                    contentAr: contentAr || '',
+                    updatedAt: new Date()
                 }
             });
         }
@@ -124,14 +128,17 @@ exports.createOrUpdateTermsOfService = async (req, res) => {
                 where: { id: terms.id },
                 data: {
                     contentEn: contentEn || terms.contentEn,
-                    contentAr: contentAr || terms.contentAr
+                    contentAr: contentAr || terms.contentAr,
+                    updatedAt: new Date()
                 }
             });
         } else {
             terms = await prisma.termsOfService.create({
                 data: {
+                    id: crypto.randomUUID(),
                     contentEn: contentEn || '',
-                    contentAr: contentAr || ''
+                    contentAr: contentAr || '',
+                    updatedAt: new Date()
                 }
             });
         }
@@ -203,18 +210,23 @@ exports.createOrUpdateAboutApp = async (req, res) => {
         if (about) {
             about = await prisma.aboutApp.update({
                 where: { id: about.id },
-                data
+                data: {
+                    ...data,
+                    updatedAt: new Date()
+                }
             });
         } else {
             about = await prisma.aboutApp.create({
                 data: {
+                    id: crypto.randomUUID(),
                     titleEn: titleEn || '',
                     titleAr: titleAr || '',
                     descriptionEn: descriptionEn || '',
                     descriptionAr: descriptionAr || '',
                     version: version || '',
                     imageEn: imageEn || '',
-                    imageAr: imageAr || ''
+                    imageAr: imageAr || '',
+                    updatedAt: new Date()
                 }
             });
         }

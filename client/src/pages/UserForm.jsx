@@ -55,7 +55,7 @@ const UserForm = () => {
                 email: data.email || '',
                 phone: data.phone || '',
                 password: '', // Don't fetch password
-                roleIds: data.roles?.map(ur => ur.roleId) || [],
+                roleIds: (data.roles || data.userrole)?.map(ur => ur.roleId) || [],
                 isActive: data.isActive !== undefined ? data.isActive : true,
                 avatar: data.avatar || null
             });

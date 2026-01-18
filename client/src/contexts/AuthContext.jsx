@@ -21,8 +21,9 @@ export const AuthProvider = ({ children }) => {
     const flattenUser = (userData) => {
         if (!userData) return null;
         const newUser = { ...userData };
-        if (newUser.roles && Array.isArray(newUser.roles)) {
-            newUser.roles = newUser.roles.map(ur => {
+        const roles = newUser.roles || newUser.userrole;
+        if (roles && Array.isArray(roles)) {
+            newUser.roles = roles.map(ur => {
                 if (typeof ur === 'string') return ur;
                 if (ur && typeof ur === 'object') {
                     return ur.role?.name || ur.roleName || ur.name || 'USER';

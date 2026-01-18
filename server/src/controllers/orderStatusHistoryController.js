@@ -46,7 +46,7 @@ exports.createStatusHistory = async (req, res) => {
         }
 
         // Verify order exists
-        const order = await prisma.foodOrder.findUnique({
+        const order = await prisma.foodorder.findUnique({
             where: { id: orderId }
         });
 

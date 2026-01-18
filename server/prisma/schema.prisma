@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model aboutapp {
+model AboutApp {
   id            String   @id
   titleEn       String?
   titleAr       String?
@@ -18,35 +18,39 @@ model aboutapp {
   imageAr       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime
+
+  @@map("aboutapp")
 }
 
-model activitylog {
+model ActivityLog {
   id         String   @id
   userId     String
   action     String
   entityType String
   entityId   String
   createdAt  DateTime @default(now())
-  user       user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ActivityLog_userId_fkey")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ActivityLog_userId_fkey")
 
   @@index([action], map: "ActivityLog_action_idx")
   @@index([createdAt], map: "ActivityLog_createdAt_idx")
   @@index([entityType, entityId], map: "ActivityLog_entityType_entityId_idx")
   @@index([userId], map: "ActivityLog_userId_idx")
+  @@map("activitylog")
 }
 
-model cart {
+model Cart {
   id        String     @id
   userId    String     @unique(map: "Cart_userId_key")
   createdAt DateTime   @default(now())
   updatedAt DateTime
-  user      user       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Cart_userId_fkey")
-  cartitem  cartitem[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Cart_userId_fkey")
+  items     CartItem[]
 
   @@index([userId], map: "Cart_userId_idx")
+  @@map("cart")
 }
 
-model cartitem {
+model CartItem {
   id        String   @id
   cartId    String
   productId String
@@ -54,69 +58,74 @@ model cartitem {
   options   String?  @db.LongText
   createdAt DateTime @default(now())
   updatedAt DateTime
-  cart      cart     @relation(fields: [cartId], references: [id], onDelete: Cascade, map: "CartItem_cartId_fkey")
-  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "CartItem_productId_fkey")
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade, map: "CartItem_cartId_fkey")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "CartItem_productId_fkey")
 
   @@unique([cartId, productId], map: "CartItem_cartId_productId_key")
   @@index([cartId], map: "CartItem_cartId_idx")
   @@index([productId], map: "CartItem_productId_idx")
+  @@map("cartitem")
 }
 
-model category {
-  id          String        @id
-  nameAr      String
-  nameEn      String
-  imageUrl    String?
-  isActive    Boolean       @default(true)
-  restaurant  restaurant[]
-  subcategory subcategory[]
+model Category {
+  id            String        @id
+  nameAr        String
+  nameEn        String
+  imageUrl      String?
+  isActive      Boolean       @default(true)
+  restaurants   Restaurant[]
+  subcategories Subcategory[]
 
   @@index([isActive], map: "Category_isActive_idx")
+  @@map("category")
 }
 
-model chat {
+model Chat {
   id              String            @id
   orderType       String
   foodOrderId     String?           @unique(map: "Chat_foodOrderId_key")
   shippingOrderId String?           @unique(map: "Chat_shippingOrderId_key")
   createdAt       DateTime          @default(now())
-  foodorder       foodorder?        @relation(fields: [foodOrderId], references: [id], onDelete: Cascade, map: "Chat_foodOrderId_fkey")
-  shippingorder   shippingorder?    @relation(fields: [shippingOrderId], references: [id], onDelete: Cascade, map: "Chat_shippingOrderId_fkey")
-  chatmessage     chatmessage[]
-  chatparticipant chatparticipant[]
+  foodOrder       FoodOrder?        @relation(fields: [foodOrderId], references: [id], onDelete: Cascade, map: "Chat_foodOrderId_fkey")
+  shippingOrder   ShippingOrder?    @relation(fields: [shippingOrderId], references: [id], onDelete: Cascade, map: "Chat_shippingOrderId_fkey")
+  messages        ChatMessage[]
+  participants    ChatParticipant[]
 
   @@index([orderType], map: "Chat_orderType_idx")
+  @@map("chat")
 }
 
-model chatmessage {
+model ChatMessage {
   id        String   @id
   chatId    String
   senderId  String
   message   String   @db.Text
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-  chat      chat     @relation(fields: [chatId], references: [id], onDelete: Cascade, map: "ChatMessage_chatId_fkey")
-  user      user     @relation(fields: [senderId], references: [id], onDelete: Cascade, map: "ChatMessage_senderId_fkey")
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade, map: "ChatMessage_chatId_fkey")
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade, map: "ChatMessage_senderId_fkey")
 
   @@index([chatId], map: "ChatMessage_chatId_idx")
   @@index([createdAt], map: "ChatMessage_createdAt_idx")
   @@index([senderId], map: "ChatMessage_senderId_idx")
+  @@map("chatmessage")
 }
 
-model chatparticipant {
+model ChatParticipant {
   id     String @id
   chatId String
   userId String
   role   String
-  chat   chat   @relation(fields: [chatId], references: [id], onDelete: Cascade, map: "ChatParticipant_chatId_fkey")
-  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ChatParticipant_userId_fkey")
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade, map: "ChatParticipant_chatId_fkey")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ChatParticipant_userId_fkey")
 
   @@unique([chatId, userId], map: "ChatParticipant_chatId_userId_key")
   @@index([chatId], map: "ChatParticipant_chatId_idx")
   @@index([userId], map: "ChatParticipant_userId_idx")
+  @@map("chatparticipant")
 }
 
-model coupon {
+model Coupon {
   id             String        @id
   restaurantId   String
   code           String        @unique(map: "Coupon_code_key")
@@ -128,48 +137,51 @@ model coupon {
   startAt        DateTime
   endAt          DateTime
   isActive       Boolean       @default(true)
-  restaurant     restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Coupon_restaurantId_fkey")
-  couponusage    couponusage[]
+  restaurant     Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Coupon_restaurantId_fkey")
+  usages         CouponUsage[]
 
   @@index([code], map: "Coupon_code_idx")
   @@index([isActive], map: "Coupon_isActive_idx")
   @@index([restaurantId], map: "Coupon_restaurantId_idx")
+  @@map("coupon")
 }
 
-model couponusage {
+model CouponUsage {
   id        String    @id
   couponId  String
   userId    String
   orderId   String
   usedAt    DateTime  @default(now())
-  coupon    coupon    @relation(fields: [couponId], references: [id], onDelete: Cascade, map: "CouponUsage_couponId_fkey")
-  foodorder foodorder @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "CouponUsage_orderId_fkey")
-  user      user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "CouponUsage_userId_fkey")
+  coupon    Coupon    @relation(fields: [couponId], references: [id], onDelete: Cascade, map: "CouponUsage_couponId_fkey")
+  foodOrder FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "CouponUsage_orderId_fkey")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "CouponUsage_userId_fkey")
 
   @@unique([couponId, userId, orderId], map: "CouponUsage_couponId_userId_orderId_key")
   @@index([couponId], map: "CouponUsage_couponId_idx")
   @@index([orderId], map: "CouponUsage_orderId_fkey")
   @@index([userId], map: "CouponUsage_userId_idx")
+  @@map("couponusage")
 }
 
-model deliverydriver {
+model DeliveryDriver {
   id               String          @id
   userId           String          @unique(map: "DeliveryDriver_userId_key")
   restaurantId     String?
   isPlatformDriver Boolean
   isOnline         Boolean         @default(false)
   rating           Float           @default(0)
-  restaurant       restaurant?     @relation(fields: [restaurantId], references: [id], map: "DeliveryDriver_restaurantId_fkey")
-  user             user            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "DeliveryDriver_userId_fkey")
-  driverlocation   driverlocation?
-  foodorder        foodorder[]
+  restaurant       Restaurant?     @relation(fields: [restaurantId], references: [id], map: "DeliveryDriver_restaurantId_fkey")
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "DeliveryDriver_userId_fkey")
+  location         DriverLocation?
+  foodOrders       FoodOrder[]
 
   @@index([isOnline], map: "DeliveryDriver_isOnline_idx")
   @@index([restaurantId], map: "DeliveryDriver_restaurantId_idx")
   @@index([userId], map: "DeliveryDriver_userId_idx")
+  @@map("deliverydriver")
 }
 
-model deliverytimeestimate {
+model DeliveryTimeEstimate {
   id           String     @id
   restaurantId String     @unique(map: "DeliveryTimeEstimate_restaurantId_key")
   baseTime     Int
@@ -177,12 +189,13 @@ model deliverytimeestimate {
   busyTimeAdd  Int?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime
-  restaurant   restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "DeliveryTimeEstimate_restaurantId_fkey")
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "DeliveryTimeEstimate_restaurantId_fkey")
 
   @@index([restaurantId], map: "DeliveryTimeEstimate_restaurantId_idx")
+  @@map("deliverytimeestimate")
 }
 
-model deliveryzone {
+model DeliveryZone {
   id           String     @id
   restaurantId String
   name         String
@@ -192,13 +205,14 @@ model deliveryzone {
   minOrder     Float?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime
-  restaurant   restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "DeliveryZone_restaurantId_fkey")
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "DeliveryZone_restaurantId_fkey")
 
   @@index([isActive], map: "DeliveryZone_isActive_idx")
   @@index([restaurantId], map: "DeliveryZone_restaurantId_idx")
+  @@map("deliveryzone")
 }
 
-model driverlocation {
+model DriverLocation {
   id             String         @id
   driverId       String         @unique(map: "DriverLocation_driverId_key")
   lat            Float
@@ -206,39 +220,42 @@ model driverlocation {
   heading        Float?
   speed          Float?
   updatedAt      DateTime
-  deliverydriver deliverydriver @relation(fields: [driverId], references: [id], onDelete: Cascade, map: "DriverLocation_driverId_fkey")
+  deliveryDriver DeliveryDriver @relation(fields: [driverId], references: [id], onDelete: Cascade, map: "DriverLocation_driverId_fkey")
 
   @@index([driverId], map: "DriverLocation_driverId_idx")
   @@index([updatedAt], map: "DriverLocation_updatedAt_idx")
+  @@map("driverlocation")
 }
 
-model favoriteproduct {
+model FavoriteProduct {
   id        String   @id
   userId    String
   productId String
   createdAt DateTime @default(now())
-  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "FavoriteProduct_productId_fkey")
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FavoriteProduct_userId_fkey")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "FavoriteProduct_productId_fkey")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FavoriteProduct_userId_fkey")
 
   @@unique([userId, productId], map: "FavoriteProduct_userId_productId_key")
   @@index([productId], map: "FavoriteProduct_productId_idx")
   @@index([userId], map: "FavoriteProduct_userId_idx")
+  @@map("favoriteproduct")
 }
 
-model favoriterestaurant {
+model FavoriteRestaurant {
   id           String     @id
   userId       String
   restaurantId String
   createdAt    DateTime   @default(now())
-  restaurant   restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "FavoriteRestaurant_restaurantId_fkey")
-  user         user       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FavoriteRestaurant_userId_fkey")
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "FavoriteRestaurant_restaurantId_fkey")
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FavoriteRestaurant_userId_fkey")
 
   @@unique([userId, restaurantId], map: "FavoriteRestaurant_userId_restaurantId_key")
   @@index([restaurantId], map: "FavoriteRestaurant_restaurantId_idx")
   @@index([userId], map: "FavoriteRestaurant_userId_idx")
+  @@map("favoriterestaurant")
 }
 
-model foodorder {
+model FoodOrder {
   id                 String               @id
   userId             String
   restaurantId       String
@@ -252,15 +269,15 @@ model foodorder {
   cancelReason       String?
   cancelledBy        String?
   createdAt          DateTime             @default(now())
-  chat               chat?
-  couponusage        couponusage[]
-  deliverydriver     deliverydriver?      @relation(fields: [driverId], references: [id], map: "FoodOrder_driverId_fkey")
-  restaurant         restaurant           @relation(fields: [restaurantId], references: [id], map: "FoodOrder_restaurantId_fkey")
-  user               user                 @relation(fields: [userId], references: [id], map: "FoodOrder_userId_fkey")
-  foodorderitem      foodorderitem[]
-  notification       notification[]
-  orderstatushistory orderstatushistory[]
-  pointstransaction  pointstransaction[]
+  chat               Chat?
+  couponUsages       CouponUsage[]
+  driver             DeliveryDriver?      @relation(fields: [driverId], references: [id], map: "FoodOrder_driverId_fkey")
+  restaurant         Restaurant           @relation(fields: [restaurantId], references: [id], map: "FoodOrder_restaurantId_fkey")
+  user               User                 @relation(fields: [userId], references: [id], map: "FoodOrder_userId_fkey")
+  items              FoodOrderItem[]
+  notifications      Notification[]
+  statusHistory      OrderStatusHistory[]
+  pointsTransactions PointsTransaction[]
 
   @@index([cancelledAt], map: "FoodOrder_cancelledAt_idx")
   @@index([createdAt], map: "FoodOrder_createdAt_idx")
@@ -268,22 +285,24 @@ model foodorder {
   @@index([restaurantId], map: "FoodOrder_restaurantId_idx")
   @@index([status], map: "FoodOrder_status_idx")
   @@index([userId], map: "FoodOrder_userId_idx")
+  @@map("foodorder")
 }
 
-model foodorderitem {
+model FoodOrderItem {
   id          String    @id
   foodOrderId String
   productId   String
   quantity    Int
   price       Float
-  foodorder   foodorder @relation(fields: [foodOrderId], references: [id], onDelete: Cascade, map: "FoodOrderItem_foodOrderId_fkey")
-  product     product   @relation(fields: [productId], references: [id], map: "FoodOrderItem_productId_fkey")
+  foodOrder   FoodOrder @relation(fields: [foodOrderId], references: [id], onDelete: Cascade, map: "FoodOrderItem_foodOrderId_fkey")
+  product     Product   @relation(fields: [productId], references: [id], map: "FoodOrderItem_productId_fkey")
 
   @@index([foodOrderId], map: "FoodOrderItem_foodOrderId_idx")
   @@index([productId], map: "FoodOrderItem_productId_idx")
+  @@map("foodorderitem")
 }
 
-model notification {
+model Notification {
   id        String     @id
   userId    String
   type      String
@@ -293,17 +312,18 @@ model notification {
   isRead    Boolean    @default(false)
   orderId   String?
   createdAt DateTime   @default(now())
-  foodorder foodorder? @relation(fields: [orderId], references: [id], map: "Notification_orderId_fkey")
-  user      user       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Notification_userId_fkey")
+  foodOrder FoodOrder? @relation(fields: [orderId], references: [id], map: "Notification_orderId_fkey")
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Notification_userId_fkey")
 
   @@index([createdAt], map: "Notification_createdAt_idx")
   @@index([isRead], map: "Notification_isRead_idx")
   @@index([orderId], map: "Notification_orderId_idx")
   @@index([type], map: "Notification_type_idx")
   @@index([userId], map: "Notification_userId_idx")
+  @@map("notification")
 }
 
-model onboardingscreen {
+model OnboardingScreen {
   id            String   @id
   title         String
   titleAr       String?
@@ -317,9 +337,10 @@ model onboardingscreen {
 
   @@index([isActive], map: "OnboardingScreen_isActive_idx")
   @@index([sortOrder], map: "OnboardingScreen_sortOrder_idx")
+  @@map("onboardingscreen")
 }
 
-model orderstatushistory {
+model OrderStatusHistory {
   id         String    @id
   orderId    String
   status     String
@@ -327,16 +348,17 @@ model orderstatushistory {
   notes      String?   @db.Text
   expectedAt DateTime?
   createdAt  DateTime  @default(now())
-  foodorder  foodorder @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "OrderStatusHistory_orderId_fkey")
-  user       user?     @relation(fields: [userId], references: [id], map: "OrderStatusHistory_userId_fkey")
+  foodOrder  FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "OrderStatusHistory_orderId_fkey")
+  user       User?     @relation(fields: [userId], references: [id], map: "OrderStatusHistory_userId_fkey")
 
   @@index([createdAt], map: "OrderStatusHistory_createdAt_idx")
   @@index([orderId], map: "OrderStatusHistory_orderId_idx")
   @@index([status], map: "OrderStatusHistory_status_idx")
   @@index([userId], map: "OrderStatusHistory_userId_fkey")
+  @@map("orderstatushistory")
 }
 
-model payment {
+model Payment {
   id              String   @id
   userId          String
   orderType       String
@@ -346,15 +368,16 @@ model payment {
   status          String
   paymentMethodId String?
   createdAt       DateTime @default(now())
-  user            user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Payment_userId_fkey")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Payment_userId_fkey")
 
   @@index([orderType, orderId], map: "Payment_orderType_orderId_idx")
   @@index([paymentMethodId], map: "Payment_paymentMethodId_idx")
   @@index([status], map: "Payment_status_idx")
   @@index([userId], map: "Payment_userId_idx")
+  @@map("payment")
 }
 
-model paymentmethod {
+model PaymentMethod {
   id          String   @id
   userId      String
   type        String
@@ -366,14 +389,15 @@ model paymentmethod {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime
-  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PaymentMethod_userId_fkey")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PaymentMethod_userId_fkey")
 
   @@index([isDefault], map: "PaymentMethod_isDefault_idx")
   @@index([type], map: "PaymentMethod_type_idx")
   @@index([userId], map: "PaymentMethod_userId_idx")
+  @@map("paymentmethod")
 }
 
-model pointstransaction {
+model PointsTransaction {
   id          String     @id
   userId      String
   orderId     String?
@@ -381,106 +405,114 @@ model pointstransaction {
   type        String
   description String?    @db.Text
   createdAt   DateTime   @default(now())
-  foodorder   foodorder? @relation(fields: [orderId], references: [id], map: "PointsTransaction_orderId_fkey")
-  user        user       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PointsTransaction_userId_fkey")
+  foodOrder   FoodOrder? @relation(fields: [orderId], references: [id], map: "PointsTransaction_orderId_fkey")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PointsTransaction_userId_fkey")
 
   @@index([createdAt], map: "PointsTransaction_createdAt_idx")
   @@index([orderId], map: "PointsTransaction_orderId_idx")
   @@index([type], map: "PointsTransaction_type_idx")
   @@index([userId], map: "PointsTransaction_userId_idx")
+  @@map("pointstransaction")
 }
 
-model privacypolicy {
+model PrivacyPolicy {
   id        String   @id
   contentEn String   @db.Text
   contentAr String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime
+
+  @@map("privacypolicy")
 }
 
-model product {
-  id               String             @id
-  restaurantId     String
-  subcategoryId    String
-  nameAr           String
-  nameEn           String
-  descriptionAr    String?            @db.Text
-  descriptionEn    String?            @db.Text
-  price            Float
-  calories         Int?
-  cookingTime      Int?
-  nutritionInfo    String?            @db.LongText
-  rating           Float              @default(0)
-  isAvailable      Boolean            @default(true)
-  cartitem         cartitem[]
-  favoriteproduct  favoriteproduct[]
-  foodorderitem    foodorderitem[]
-  restaurant       restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Product_restaurantId_fkey")
-  subcategory      subcategory        @relation(fields: [subcategoryId], references: [id], map: "Product_subcategoryId_fkey")
-  productimage     productimage[]
-  productoption    productoption[]
-  promotionproduct promotionproduct[]
+model Product {
+  id                String             @id
+  restaurantId      String
+  subcategoryId     String
+  nameAr            String
+  nameEn            String
+  descriptionAr     String?            @db.Text
+  descriptionEn     String?            @db.Text
+  price             Float
+  calories          Int?
+  cookingTime       Int?
+  nutritionInfo     String?            @db.LongText
+  rating            Float              @default(0)
+  isAvailable       Boolean            @default(true)
+  cartItems         CartItem[]
+  favoriteProducts  FavoriteProduct[]
+  foodOrderItems    FoodOrderItem[]
+  restaurant        Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Product_restaurantId_fkey")
+  subcategory       Subcategory        @relation(fields: [subcategoryId], references: [id], map: "Product_subcategoryId_fkey")
+  images            ProductImage[]
+  options           ProductOption[]
+  promotionProducts PromotionProduct[]
 
   @@index([isAvailable], map: "Product_isAvailable_idx")
   @@index([restaurantId], map: "Product_restaurantId_idx")
   @@index([subcategoryId], map: "Product_subcategoryId_idx")
+  @@map("product")
 }
 
-model productimage {
+model ProductImage {
   id        String   @id
   productId String
   imageUrl  String
   isPrimary Boolean  @default(false)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
-  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductImage_productId_fkey")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductImage_productId_fkey")
 
   @@index([isPrimary], map: "ProductImage_isPrimary_idx")
   @@index([productId], map: "ProductImage_productId_idx")
+  @@map("productimage")
 }
 
-model productoption {
+model ProductOption {
   id        String  @id
   productId String
   nameAr    String
   nameEn    String
   price     Float
   isActive  Boolean @default(true)
-  product   product @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductOption_productId_fkey")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductOption_productId_fkey")
 
   @@index([productId], map: "ProductOption_productId_idx")
+  @@map("productoption")
 }
 
-model promotion {
-  id               String             @id
-  restaurantId     String
-  type             String
-  discountType     String
-  discountValue    Float
-  startAt          DateTime
-  endAt            DateTime
-  isActive         Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  restaurant       restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Promotion_restaurantId_fkey")
-  promotionproduct promotionproduct[]
+model Promotion {
+  id                String             @id
+  restaurantId      String
+  type              String
+  discountType      String
+  discountValue     Float
+  startAt           DateTime
+  endAt             DateTime
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  restaurant        Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "Promotion_restaurantId_fkey")
+  promotionProducts PromotionProduct[]
 
   @@index([isActive], map: "Promotion_isActive_idx")
   @@index([restaurantId], map: "Promotion_restaurantId_idx")
   @@index([startAt, endAt], map: "Promotion_startAt_endAt_idx")
+  @@map("promotion")
 }
 
-model promotionproduct {
+model PromotionProduct {
   id          String    @id
   promotionId String
   productId   String
-  product     product   @relation(fields: [productId], references: [id], onDelete: Cascade, map: "PromotionProduct_productId_fkey")
-  promotion   promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade, map: "PromotionProduct_promotionId_fkey")
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade, map: "PromotionProduct_productId_fkey")
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade, map: "PromotionProduct_promotionId_fkey")
 
   @@unique([promotionId, productId], map: "PromotionProduct_promotionId_productId_key")
   @@index([productId], map: "PromotionProduct_productId_fkey")
+  @@map("promotionproduct")
 }
 
-model rating {
+model Rating {
   id         String   @id
   userId     String
   targetType String
@@ -488,14 +520,15 @@ model rating {
   rating     Int
   comment    String?  @db.Text
   createdAt  DateTime @default(now())
-  user       user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Rating_userId_fkey")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Rating_userId_fkey")
 
   @@index([rating], map: "Rating_rating_idx")
   @@index([targetType, targetId], map: "Rating_targetType_targetId_idx")
   @@index([userId], map: "Rating_userId_idx")
+  @@map("rating")
 }
 
-model restaurant {
+model Restaurant {
   id                            String                @id
   categoryId                    String
   ownerId                       String
@@ -510,25 +543,26 @@ model restaurant {
   rating                        Float                 @default(0)
   isActive                      Boolean               @default(true)
   createdAt                     DateTime              @default(now())
-  coupon                        coupon[]
-  deliverydriver                deliverydriver[]
-  deliverytimeestimate          deliverytimeestimate?
-  deliveryzone                  deliveryzone[]
-  favoriterestaurant            favoriterestaurant[]
-  foodorder                     foodorder[]
-  product                       product[]
-  promotion                     promotion[]
-  user_restaurant_adminIdTouser user?                 @relation("restaurant_adminIdTouser", fields: [adminId], references: [id], map: "Restaurant_adminId_fkey")
-  category                      category              @relation(fields: [categoryId], references: [id], map: "Restaurant_categoryId_fkey")
-  user_restaurant_ownerIdTouser user                  @relation("restaurant_ownerIdTouser", fields: [ownerId], references: [id], map: "Restaurant_ownerId_fkey")
-  restauranthours               restauranthours[]
+  coupons                       Coupon[]
+  drivers                       DeliveryDriver[]
+  deliveryTimeEstimate          DeliveryTimeEstimate?
+  deliveryZones                 DeliveryZone[]
+  favoriteByUsers               FavoriteRestaurant[]
+  foodOrders                    FoodOrder[]
+  products                      Product[]
+  promotions                    Promotion[]
+  admin                         User?                 @relation("restaurant_adminIdTouser", fields: [adminId], references: [id], map: "Restaurant_adminId_fkey")
+  category                      Category              @relation(fields: [categoryId], references: [id], map: "Restaurant_categoryId_fkey")
+  owner                         User                  @relation("restaurant_ownerIdTouser", fields: [ownerId], references: [id], map: "Restaurant_ownerId_fkey")
+  hours                         RestaurantHours[]
 
   @@index([categoryId], map: "Restaurant_categoryId_idx")
   @@index([isActive], map: "Restaurant_isActive_idx")
   @@index([ownerId], map: "Restaurant_ownerId_idx")
+  @@map("restaurant")
 }
 
-model restauranthours {
+model RestaurantHours {
   id           String     @id
   restaurantId String
   dayOfWeek    Int
@@ -537,67 +571,72 @@ model restauranthours {
   isOpen       Boolean    @default(true)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime
-  restaurant   restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "RestaurantHours_restaurantId_fkey")
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, map: "RestaurantHours_restaurantId_fkey")
 
   @@unique([restaurantId, dayOfWeek], map: "RestaurantHours_restaurantId_dayOfWeek_key")
   @@index([dayOfWeek], map: "RestaurantHours_dayOfWeek_idx")
   @@index([restaurantId], map: "RestaurantHours_restaurantId_idx")
+  @@map("restauranthours")
 }
 
-model role {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique(map: "Role_name_key")
-  userrole userrole[]
+model Role {
+  id    Int        @id @default(autoincrement())
+  name  String     @unique(map: "Role_name_key")
+  users UserRole[]
 
   @@index([name], map: "Role_name_idx")
+  @@map("role")
 }
 
-model shippingagent {
-  id            String          @id
-  userId        String          @unique(map: "ShippingAgent_userId_key")
-  vehicleType   String
-  isActive      Boolean         @default(true)
-  rating        Float           @default(0)
-  user          user            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ShippingAgent_userId_fkey")
-  shippingorder shippingorder[]
+model ShippingAgent {
+  id             String          @id
+  userId         String          @unique(map: "ShippingAgent_userId_key")
+  vehicleType    String
+  isActive       Boolean         @default(true)
+  rating         Float           @default(0)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ShippingAgent_userId_fkey")
+  shippingOrders ShippingOrder[]
 
   @@index([isActive], map: "ShippingAgent_isActive_idx")
   @@index([userId], map: "ShippingAgent_userId_idx")
+  @@map("shippingagent")
 }
 
-model shippingorder {
-  id                 String               @id
-  userId             String
-  agentId            String?
-  pickupLat          Float
-  pickupLng          Float
-  deliveryLat        Float
-  deliveryLng        Float
-  status             String
-  expectedCost       Float
-  finalCost          Float?
-  createdAt          DateTime             @default(now())
-  chat               chat?
-  shippingagent      shippingagent?       @relation(fields: [agentId], references: [id], map: "ShippingOrder_agentId_fkey")
-  user               user                 @relation(fields: [userId], references: [id], map: "ShippingOrder_userId_fkey")
-  shippingorderimage shippingorderimage[]
+model ShippingOrder {
+  id              String               @id
+  userId          String
+  agentId         String?
+  pickupLat       Float
+  pickupLng       Float
+  deliveryLat     Float
+  deliveryLng     Float
+  status          String
+  expectedCost    Float
+  finalCost       Float?
+  createdAt       DateTime             @default(now())
+  chat            Chat?
+  agent           ShippingAgent?       @relation(fields: [agentId], references: [id], map: "ShippingOrder_agentId_fkey")
+  user            User                 @relation(fields: [userId], references: [id], map: "ShippingOrder_userId_fkey")
+  images          ShippingOrderImage[]
 
   @@index([agentId], map: "ShippingOrder_agentId_idx")
   @@index([createdAt], map: "ShippingOrder_createdAt_idx")
   @@index([status], map: "ShippingOrder_status_idx")
   @@index([userId], map: "ShippingOrder_userId_idx")
+  @@map("shippingorder")
 }
 
-model shippingorderimage {
+model ShippingOrderImage {
   id              String        @id
   shippingOrderId String
   imageUrl        String
-  shippingorder   shippingorder @relation(fields: [shippingOrderId], references: [id], onDelete: Cascade, map: "ShippingOrderImage_shippingOrderId_fkey")
+  shippingOrder   ShippingOrder @relation(fields: [shippingOrderId], references: [id], onDelete: Cascade, map: "ShippingOrderImage_shippingOrderId_fkey")
 
   @@index([shippingOrderId], map: "ShippingOrderImage_shippingOrderId_idx")
+  @@map("shippingorderimage")
 }
 
-model splashscreen {
+model SplashScreen {
   id        String   @id
   image     String
   duration  Int      @default(3000)
@@ -608,9 +647,10 @@ model splashscreen {
 
   @@index([isActive], map: "SplashScreen_isActive_idx")
   @@index([sortOrder], map: "SplashScreen_sortOrder_idx")
+  @@map("splashscreen")
 }
 
-model subcategory {
+model Subcategory {
   id         String    @id
   categoryId String
   nameAr     String
@@ -618,36 +658,40 @@ model subcategory {
   imageUrl   String?
   sortOrder  Int       @default(0)
   isActive   Boolean   @default(true)
-  product    product[]
-  category   category  @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "Subcategory_categoryId_fkey")
+  products   Product[]
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "Subcategory_categoryId_fkey")
 
   @@index([categoryId], map: "Subcategory_categoryId_idx")
+  @@map("subcategory")
 }
 
-model supportticket {
+model SupportTicket {
   id        String   @id
   userId    String
   orderType String
   orderId   String
   status    String
   message   String   @db.Text
-  createdAt DateTime @default(now())
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SupportTicket_userId_fkey")
+  createdAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SupportTicket_userId_fkey")
 
   @@index([createdAt], map: "SupportTicket_createdAt_idx")
   @@index([status], map: "SupportTicket_status_idx")
   @@index([userId], map: "SupportTicket_userId_idx")
+  @@map("supportticket")
 }
 
-model termsofservice {
+model TermsOfService {
   id        String   @id
   contentEn String   @db.Text
   contentAr String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime
+
+  @@map("termsofservice")
 }
 
-model user {
+model User {
   id                                  String               @id
   name                                String
   phone                               String               @unique(map: "User_phone_key")
@@ -657,35 +701,36 @@ model user {
   isActive                            Boolean              @default(true)
   avatar                              String?
   createdAt                           DateTime             @default(now())
-  activitylog                         activitylog[]
-  cart                                cart?
-  chatmessage                         chatmessage[]
-  chatparticipant                     chatparticipant[]
-  couponusage                         couponusage[]
-  deliverydriver                      deliverydriver?
-  favoriteproduct                     favoriteproduct[]
-  favoriterestaurant                  favoriterestaurant[]
-  foodorder                           foodorder[]
-  notification                        notification[]
-  orderstatushistory                  orderstatushistory[]
-  payment                             payment[]
-  paymentmethod                       paymentmethod[]
-  pointstransaction                   pointstransaction[]
-  rating                              rating[]
-  restaurant_restaurant_adminIdTouser restaurant?          @relation("restaurant_adminIdTouser")
-  restaurant_restaurant_ownerIdTouser restaurant[]         @relation("restaurant_ownerIdTouser")
-  shippingagent                       shippingagent?
-  shippingorder                       shippingorder[]
-  supportticket                       supportticket[]
-  useraddress                         useraddress[]
-  userpoints                          userpoints?
-  userrole                            userrole[]
+  activityLogs                        ActivityLog[]
+  cart                                Cart?
+  chatMessages                        ChatMessage[]
+  chatParticipants                    ChatParticipant[]
+  couponUsages                        CouponUsage[]
+  deliveryDriver                      DeliveryDriver?
+  favoriteProducts                    FavoriteProduct[]
+  favoriteRestaurants                 FavoriteRestaurant[]
+  foodOrders                          FoodOrder[]
+  notifications                       Notification[]
+  orderStatusHistories                OrderStatusHistory[]
+  payments                            Payment[]
+  paymentMethods                      PaymentMethod[]
+  pointsTransactions                  PointsTransaction[]
+  ratings                             Rating[]
+  managedRestaurant                   Restaurant?          @relation("restaurant_adminIdTouser")
+  ownedRestaurants                    Restaurant[]         @relation("restaurant_ownerIdTouser")
+  shippingAgent                       ShippingAgent?
+  shippingOrders                      ShippingOrder[]
+  supportTickets                      SupportTicket[]
+  addresses                           UserAddress[]
+  userPoints                          UserPoints?
+  roles                               UserRole[]
 
   @@index([email], map: "User_email_idx")
   @@index([phone], map: "User_phone_idx")
+  @@map("user")
 }
 
-model useraddress {
+model UserAddress {
   id        String   @id
   userId    String
   type      String?
@@ -701,14 +746,15 @@ model useraddress {
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserAddress_userId_fkey")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserAddress_userId_fkey")
 
   @@index([isDefault], map: "UserAddress_isDefault_idx")
   @@index([type], map: "UserAddress_type_idx")
   @@index([userId], map: "UserAddress_userId_idx")
+  @@map("useraddress")
 }
 
-model userpoints {
+model UserPoints {
   id           String    @id
   userId       String    @unique(map: "UserPoints_userId_key")
   points       Int       @default(0)
@@ -717,18 +763,20 @@ model userpoints {
   expiresAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime
-  user         user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserPoints_userId_fkey")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserPoints_userId_fkey")
 
   @@index([expiresAt], map: "UserPoints_expiresAt_idx")
   @@index([userId], map: "UserPoints_userId_idx")
+  @@map("userpoints")
 }
 
-model userrole {
+model UserRole {
   userId String
   roleId Int
-  role   role   @relation(fields: [roleId], references: [id], onDelete: Cascade, map: "UserRole_roleId_fkey")
-  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserRole_userId_fkey")
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade, map: "UserRole_roleId_fkey")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserRole_userId_fkey")
 
   @@id([userId, roleId])
   @@index([roleId], map: "UserRole_roleId_fkey")
+  @@map("userrole")
 }

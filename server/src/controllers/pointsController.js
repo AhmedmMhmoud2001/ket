@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const crypto = require('crypto');
 
 // Get user points (for authenticated user)
 exports.getUserPoints = async (req, res) => {
@@ -31,10 +32,12 @@ exports.getUserPoints = async (req, res) => {
         if (!userPoints) {
             userPoints = await prisma.userPoints.create({
                 data: {
+                    id: crypto.randomUUID(),
                     userId,
                     points: 0,
                     earnedPoints: 0,
-                    usedPoints: 0
+                    usedPoints: 0,
+                    updatedAt: new Date()
                 },
                 include: {
                     user: {
@@ -216,10 +219,12 @@ exports.earnPoints = async (req, res) => {
         if (!userPoints) {
             userPoints = await prisma.userPoints.create({
                 data: {
+                    id: crypto.randomUUID(),
                     userId,
                     points: 0,
                     earnedPoints: 0,
-                    usedPoints: 0
+                    usedPoints: 0,
+                    updatedAt: new Date()
                 }
             });
         }
@@ -233,13 +238,15 @@ exports.earnPoints = async (req, res) => {
                 },
                 earnedPoints: {
                     increment: points
-                }
+                },
+                updatedAt: new Date()
             }
         });
 
         // Create transaction record
         const transaction = await prisma.pointsTransaction.create({
             data: {
+                id: crypto.randomUUID(),
                 userId,
                 orderId: orderId || null,
                 points,
@@ -299,13 +306,15 @@ exports.redeemPoints = async (req, res) => {
                 },
                 usedPoints: {
                     increment: points
-                }
+                },
+                updatedAt: new Date()
             }
         });
 
         // Create transaction record
         const transaction = await prisma.pointsTransaction.create({
             data: {
+                id: crypto.randomUUID(),
                 userId,
                 points: -points, // Negative for used points
                 type: 'used',
@@ -353,10 +362,12 @@ exports.adjustPoints = async (req, res) => {
         if (!userPoints) {
             userPoints = await prisma.userPoints.create({
                 data: {
+                    id: crypto.randomUUID(),
                     userId,
                     points: 0,
                     earnedPoints: 0,
-                    usedPoints: 0
+                    usedPoints: 0,
+                    updatedAt: new Date()
                 }
             });
         }
@@ -388,12 +399,16 @@ exports.adjustPoints = async (req, res) => {
 
         const updatedPoints = await prisma.userPoints.update({
             where: { userId },
-            data: updateData
+            data: {
+                ...updateData,
+                updatedAt: new Date()
+            }
         });
 
         // Create transaction record
         const transaction = await prisma.pointsTransaction.create({
             data: {
+                id: crypto.randomUUID(),
                 userId,
                 points: points > 0 ? points : -Math.abs(points),
                 type: transactionType,

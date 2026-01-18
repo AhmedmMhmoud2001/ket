@@ -9,13 +9,18 @@ exports.getAllCustomers = async (req, res) => {
         const take = parseInt(limit);
 
         // Build where clause - Customers have role CUSTOMER
-        const where = { role: 'CUSTOMER' };
+        const where = {
+            userrole: {
+                some: {
+                    role: { name: 'CUSTOMER' }
+                }
+            }
+        };
 
         // Search filter
         if (search) {
             where.OR = [
-                { firstName: { contains: search } },
-                { lastName: { contains: search } },
+                { name: { contains: search } },
                 { email: { contains: search } },
                 { phone: { contains: search } }
             ];
@@ -23,7 +28,7 @@ exports.getAllCustomers = async (req, res) => {
 
         // Status filter
         if (status) {
-            where.status = status.toUpperCase();
+            where.isActive = status.toUpperCase() === 'ACTIVE';
         }
 
         const [customers, total] = await Promise.all([
@@ -31,13 +36,11 @@ exports.getAllCustomers = async (req, res) => {
                 where,
                 select: {
                     id: true,
-                    firstName: true,
-                    lastName: true,
+                    name: true,
                     email: true,
                     phone: true,
                     avatar: true,
-                    role: true,
-                    status: true,
+                    isActive: true,
                     createdAt: true
                 },
                 orderBy: { createdAt: 'desc' },
@@ -50,9 +53,9 @@ exports.getAllCustomers = async (req, res) => {
         // Format customers with full_name
         const formattedCustomers = customers.map(customer => ({
             ...customer,
-            full_name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
+            full_name: customer.name,
             created_at: customer.createdAt,
-            is_active: customer.status === 'ACTIVE'
+            is_active: customer.isActive
         }));
 
         res.json({
@@ -90,8 +93,11 @@ exports.updateCustomerStatus = async (req, res) => {
             });
         }
 
-        const customer = await prisma.user.findUnique({
-            where: { id, role: 'CUSTOMER' }
+        const customer = await prisma.user.findFirst({
+            where: {
+                id,
+                userrole: { some: { role: { name: 'CUSTOMER' } } }
+            }
         });
 
         if (!customer) {
@@ -103,7 +109,7 @@ exports.updateCustomerStatus = async (req, res) => {
 
         await prisma.user.update({
             where: { id },
-            data: { status: is_active ? 'ACTIVE' : 'BANNED' }
+            data: { isActive: !!is_active }
         });
 
         res.json({
@@ -136,9 +142,9 @@ exports.createCustomer = async (req, res) => {
         });
 
         if (existing) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Customer with this email or phone already exists' 
+            return res.status(400).json({
+                success: false,
+                message: 'Customer with this email or phone already exists'
             });
         }
 
@@ -149,16 +155,24 @@ exports.createCustomer = async (req, res) => {
         const firstName = nameParts[0];
         const lastName = nameParts.slice(1).join(' ') || '';
 
+        const role = await prisma.role.findUnique({
+            where: { name: 'CUSTOMER' }
+        });
+
         await prisma.user.create({
             data: {
-                firstName,
-                lastName,
+                id: require('crypto').randomUUID(),
+                name: full_name,
                 email,
                 phone,
                 password: hashedPassword,
                 avatar: avatar_url || null,
-                role: 'CUSTOMER',
-                status: 'ACTIVE'
+                isActive: true,
+                userrole: {
+                    create: {
+                        roleId: role.id
+                    }
+                }
             }
         });
 
@@ -190,8 +204,7 @@ exports.updateCustomer = async (req, res) => {
         const lastName = nameParts.slice(1).join(' ') || '';
 
         const updateData = {
-            firstName,
-            lastName,
+            name: full_name,
             email,
             phone
         };

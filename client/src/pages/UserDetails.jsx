@@ -89,7 +89,7 @@ const UserDetails = () => {
         );
     }
 
-    const userRoles = user.roles?.map(ur => ur.role?.name || ur.roleName) || [];
+    const userRoles = (user.roles || user.userrole)?.map(ur => ur.role?.name || ur.roleName) || [];
 
     return (
         <div className="space-y-6">

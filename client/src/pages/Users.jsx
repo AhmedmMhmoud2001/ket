@@ -177,7 +177,7 @@ const Users = () => {
                                     </td>
                                 </tr>
                             ) : users.map(user => {
-                                const userRoles = user.roleNames || user.roles?.map(ur => ur.role?.name || ur.roleName) || [];
+                                const userRoles = user.roleNames || (user.roles || user.userrole)?.map(ur => ur.role?.name || ur.roleName) || [];
                                 return (
                                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">

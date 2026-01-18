@@ -38,10 +38,13 @@ exports.getAllRestaurants = async (req, res) => {
             prisma.restaurant.count({ where })
         ]);
 
+        // Format response
+        const formattedRestaurants = restaurants;
+
         res.json({
             success: true,
             data: {
-                restaurants,
+                restaurants: formattedRestaurants,
                 pagination: {
                     page: parseInt(page),
                     limit: take,
@@ -80,9 +83,12 @@ exports.getRestaurantById = async (req, res) => {
             });
         }
 
+        // Format response
+        const formattedRestaurant = restaurant;
+
         res.json({
             success: true,
-            data: restaurant
+            data: formattedRestaurant
         });
     } catch (error) {
         console.error('Get restaurant error:', error);
@@ -136,7 +142,7 @@ async function syncUserRestaurantRole(userId) {
 
         // Apply changes
         for (const roleId of rolesToHave) {
-            await prisma.userRole.upsert({
+            await prisma.userrole.upsert({
                 where: { userId_roleId: { userId, roleId } },
                 update: {},
                 create: { userId, roleId }
@@ -144,7 +150,7 @@ async function syncUserRestaurantRole(userId) {
         }
 
         if (rolesToRemove.length > 0) {
-            await prisma.userRole.deleteMany({
+            await prisma.userrole.deleteMany({
                 where: {
                     userId,
                     roleId: { in: rolesToRemove }

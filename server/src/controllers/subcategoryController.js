@@ -214,7 +214,7 @@ exports.deleteSubcategory = async (req, res) => {
         const subcategory = await prisma.subcategory.findUnique({
             where: { id },
             include: {
-                products: { select: { id: true } }
+                product: { select: { id: true } }
             }
         });
 
@@ -226,10 +226,10 @@ exports.deleteSubcategory = async (req, res) => {
         }
 
         // Check if has products
-        if (subcategory.products.length > 0) {
+        if (subcategory.product.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: `Cannot delete subcategory. ${subcategory.products.length} product(s) are using it.`
+                message: `Cannot delete subcategory. ${subcategory.product.length} product(s) are using it.`
             });
         }
 

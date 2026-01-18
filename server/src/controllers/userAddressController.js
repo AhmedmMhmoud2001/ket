@@ -12,7 +12,7 @@ exports.getUserAddresses = async (req, res) => {
             });
         }
 
-        const addresses = await prisma.userAddress.findMany({
+        const addresses = await prisma.useraddress.findMany({
             where: { userId },
             orderBy: [
                 { isDefault: 'desc' },
@@ -40,7 +40,7 @@ exports.getAddressById = async (req, res) => {
         const { id } = req.params;
         const userId = req.user.id;
 
-        const address = await prisma.userAddress.findFirst({
+        const address = await prisma.useraddress.findFirst({
             where: {
                 id,
                 userId
@@ -83,13 +83,13 @@ exports.createAddress = async (req, res) => {
 
         // If setting as default, unset other default addresses
         if (isDefault) {
-            await prisma.userAddress.updateMany({
+            await prisma.useraddress.updateMany({
                 where: { userId, isDefault: true },
                 data: { isDefault: false }
             });
         }
 
-        const newAddress = await prisma.userAddress.create({
+        const newAddress = await prisma.useraddress.create({
             data: {
                 userId,
                 type: type || null,
@@ -129,7 +129,7 @@ exports.updateAddress = async (req, res) => {
         const { type, label, address, lat, lng, phone, building, floor, apartment, notes, isDefault } = req.body;
 
         // Verify address belongs to user
-        const existingAddress = await prisma.userAddress.findFirst({
+        const existingAddress = await prisma.useraddress.findFirst({
             where: {
                 id,
                 userId
@@ -145,7 +145,7 @@ exports.updateAddress = async (req, res) => {
 
         // If setting as default, unset other default addresses
         if (isDefault && !existingAddress.isDefault) {
-            await prisma.userAddress.updateMany({
+            await prisma.useraddress.updateMany({
                 where: { userId, isDefault: true },
                 data: { isDefault: false }
             });
@@ -164,7 +164,7 @@ exports.updateAddress = async (req, res) => {
         if (notes !== undefined) updateData.notes = notes;
         if (isDefault !== undefined) updateData.isDefault = isDefault;
 
-        const updatedAddress = await prisma.userAddress.update({
+        const updatedAddress = await prisma.useraddress.update({
             where: { id },
             data: updateData
         });
@@ -191,7 +191,7 @@ exports.deleteAddress = async (req, res) => {
         const userId = req.user.id;
 
         // Verify address belongs to user
-        const address = await prisma.userAddress.findFirst({
+        const address = await prisma.useraddress.findFirst({
             where: {
                 id,
                 userId
@@ -205,7 +205,7 @@ exports.deleteAddress = async (req, res) => {
             });
         }
 
-        await prisma.userAddress.delete({
+        await prisma.useraddress.delete({
             where: { id }
         });
 
@@ -230,7 +230,7 @@ exports.setDefaultAddress = async (req, res) => {
         const userId = req.user.id;
 
         // Verify address belongs to user
-        const address = await prisma.userAddress.findFirst({
+        const address = await prisma.useraddress.findFirst({
             where: {
                 id,
                 userId
@@ -245,13 +245,13 @@ exports.setDefaultAddress = async (req, res) => {
         }
 
         // Unset other default addresses
-        await prisma.userAddress.updateMany({
+        await prisma.useraddress.updateMany({
             where: { userId, isDefault: true },
             data: { isDefault: false }
         });
 
         // Set this address as default
-        const updatedAddress = await prisma.userAddress.update({
+        const updatedAddress = await prisma.useraddress.update({
             where: { id },
             data: { isDefault: true }
         });

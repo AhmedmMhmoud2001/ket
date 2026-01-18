@@ -113,13 +113,15 @@ exports.createOnboardingScreen = async (req, res) => {
 
         const screen = await prisma.onboardingScreen.create({
             data: {
+                id: require('crypto').randomUUID(),
                 title,
                 titleAr: title_ar || null,
                 description,
                 descriptionAr: description_ar || null,
                 image: image_url,
                 sortOrder: sort_order ? parseInt(sort_order) : 0,
-                isActive: is_active !== undefined ? is_active : true
+                isActive: is_active !== undefined ? is_active : true,
+                updatedAt: new Date()
             }
         });
 
@@ -181,7 +183,10 @@ exports.updateOnboardingScreen = async (req, res) => {
 
         const screen = await prisma.onboardingScreen.update({
             where: { id },
-            data: updateData
+            data: {
+                ...updateData,
+                updatedAt: new Date()
+            }
         });
 
         res.json({
@@ -257,7 +262,10 @@ exports.toggleOnboardingScreen = async (req, res) => {
 
         const updated = await prisma.onboardingScreen.update({
             where: { id },
-            data: { isActive: !screen.isActive }
+            data: {
+                isActive: !screen.isActive,
+                updatedAt: new Date()
+            }
         });
 
         res.json({
