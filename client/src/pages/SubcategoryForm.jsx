@@ -14,7 +14,7 @@ const SubcategoryForm = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [categories, setCategories] = useState([]);
-    
+
     const [formData, setFormData] = useState({
         category_id: '',
         name: '',
@@ -59,9 +59,9 @@ const SubcategoryForm = () => {
             if (data.image || data.image_url) {
                 const imageUrl = (data.image || data.image_url);
                 setImagePreview(
-                    imageUrl.startsWith('http') 
-                        ? imageUrl 
-                        : `http://localhost:5000${imageUrl}`
+                    imageUrl.startsWith('http')
+                        ? imageUrl
+                        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${imageUrl}`
                 );
             }
         } catch (error) {
@@ -121,7 +121,7 @@ const SubcategoryForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.category_id) {
             toast.error('Please select a parent category');
             return;
@@ -175,16 +175,16 @@ const SubcategoryForm = () => {
                 {/* Image Upload */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Subcategory Image</h2>
-                    
+
                     <div className="flex justify-center">
                         <div className="w-full max-w-md">
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition-colors">
                                 <div className="space-y-2 text-center w-full">
                                     {imagePreview ? (
                                         <div className="relative inline-block">
-                                            <img 
-                                                src={imagePreview} 
-                                                alt="Subcategory preview" 
+                                            <img
+                                                src={imagePreview}
+                                                alt="Subcategory preview"
                                                 className="mx-auto h-48 w-48 object-cover rounded-xl shadow-lg"
                                             />
                                             <button
@@ -222,7 +222,7 @@ const SubcategoryForm = () => {
                 {/* Basic Information */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-                    
+
                     <div className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">

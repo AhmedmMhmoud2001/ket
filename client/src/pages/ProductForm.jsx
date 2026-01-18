@@ -85,7 +85,7 @@ const ProductForm = () => {
                 const previews = data.images.map(img =>
                     img.imageUrl.startsWith('http')
                         ? img.imageUrl
-                        : `${import.meta.env.VITE_API_URL}${img.imageUrl}`
+                        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${img.imageUrl}`
                 );
                 setImagePreviews(previews);
             }

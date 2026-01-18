@@ -54,10 +54,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     const adminLinks = [
         { to: '/dashboard', icon: HomeIcon, label: t('common.dashboard') },
         { to: '/users', icon: UsersIcon, label: t('common.users') || 'Users' },
+        { to: '/categories', icon: RectangleStackIcon, label: t('common.categories') },
         { to: '/orders', icon: ShoppingBagIcon, label: t('common.orders') },
         { to: '/restaurants', icon: BuildingStorefrontIcon, label: t('common.restaurants') || 'Restaurants' },
         { to: '/products', icon: RectangleGroupIcon, label: t('common.products') || 'Products' },
-        { to: '/categories', icon: RectangleStackIcon, label: t('common.categories') },
         { to: '/subcategories', icon: ListBulletIcon, label: t('common.subcategories') || 'Subcategories' },
         { to: '/drivers', icon: TruckIcon, label: t('common.drivers') },
         { to: '/shipping-agents', icon: PaperAirplaneIcon, label: t('common.shippingAgents') },
@@ -98,10 +98,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             )}
 
             <aside
-                className={`fixed top-0 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} h-full bg-white border-gray-200 z-50 transition-all duration-300 transform ${isOpen 
-                    ? 'translate-x-0 w-64' 
-                    : isRTL 
-                        ? 'translate-x-full lg:translate-x-0 lg:w-20' 
+                className={`fixed top-0 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} h-full bg-white border-gray-200 z-50 transition-all duration-300 transform ${isOpen
+                    ? 'translate-x-0 w-64'
+                    : isRTL
+                        ? 'translate-x-full lg:translate-x-0 lg:w-20'
                         : '-translate-x-full lg:translate-x-0 lg:w-20'
                     }`}
             >

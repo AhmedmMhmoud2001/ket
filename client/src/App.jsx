@@ -15,6 +15,7 @@ import Subcategories from './pages/Subcategories';
 import Products from './pages/Products';
 import ProductForm from './pages/ProductForm';
 import Users from './pages/Users';
+import UserForm from './pages/UserForm';
 import UserDetails from './pages/UserDetails';
 import Coupons from './pages/Coupons';
 import Offers from './pages/Offers';
@@ -79,8 +80,10 @@ function App() {
                         <Route path="orders/:id" element={<OrderDetails />} />
                         <Route path="tracking/:id" element={<OrderTracking />} />
                         <Route path="drivers" element={<Drivers />} />
-                        <Route path="users" element={<Users />} />
-                        <Route path="users/:id" element={<UserDetails />} />
+                        <Route path="users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+                        <Route path="users/new" element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
+                        <Route path="users/:id/edit" element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
+                        <Route path="users/:id" element={<ProtectedRoute><UserDetails /></ProtectedRoute>} />
                         <Route path="categories" element={<Categories />} />
                         <Route path="categories/new" element={<CategoryForm />} />
                         <Route path="categories/:id/edit" element={<CategoryForm />} />

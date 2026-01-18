@@ -19,6 +19,7 @@ model User {
   password     String
   language     String?
   isActive     Boolean  @default(true)
+  avatar       String?
   createdAt    DateTime @default(now())
 
   roles        UserRole[]

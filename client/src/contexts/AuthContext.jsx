@@ -18,6 +18,24 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const flattenUser = (userData) => {
+        if (!userData) return null;
+        const newUser = { ...userData };
+        if (newUser.roles && Array.isArray(newUser.roles)) {
+            newUser.roles = newUser.roles.map(ur => {
+                if (typeof ur === 'string') return ur;
+                if (ur && typeof ur === 'object') {
+                    return ur.role?.name || ur.roleName || ur.name || 'USER';
+                }
+                return 'USER';
+            });
+        }
+        if (newUser.role && typeof newUser.role === 'object') {
+            newUser.role = newUser.role.name || 'USER';
+        }
+        return newUser;
+    };
+
     useEffect(() => {
         checkAuth();
     }, []);
@@ -32,14 +50,7 @@ export const AuthProvider = ({ children }) => {
 
         try {
             const response = await api.get('/auth/me');
-            const userData = response.data.data;
-
-            // Flatten roles for easier checking: [{role: {name: 'ADMIN'}}] -> ['ADMIN']
-            if (userData.roles && Array.isArray(userData.roles)) {
-                userData.roles = userData.roles.map(ur => ur.role?.name || ur.roleName);
-            }
-
-            setUser(userData);
+            setUser(flattenUser(response.data.data));
         } catch (error) {
             console.error('Auth check failed:', error);
             localStorage.removeItem('token');
@@ -53,13 +64,8 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('/auth/login', { email, password });
             const { user: userData, token } = response.data.data;
 
-            // Flatten roles
-            if (userData.roles && Array.isArray(userData.roles)) {
-                userData.roles = userData.roles.map(ur => ur.role?.name || ur.roleName);
-            }
-
             localStorage.setItem('token', token);
-            setUser(userData);
+            setUser(flattenUser(userData));
 
             toast.success('Login successful!');
             navigate('/dashboard');
@@ -96,7 +102,7 @@ export const AuthProvider = ({ children }) => {
             const { user, token } = response.data.data;
 
             localStorage.setItem('token', token);
-            setUser(user);
+            setUser(flattenUser(user));
 
             toast.success('Login successful!');
             navigate('/dashboard');
@@ -115,7 +121,7 @@ export const AuthProvider = ({ children }) => {
             const { user, token: authToken } = response.data.data;
 
             localStorage.setItem('token', authToken);
-            setUser(user);
+            setUser(flattenUser(user));
 
             toast.success('Login successful!');
             navigate('/dashboard');
@@ -134,7 +140,7 @@ export const AuthProvider = ({ children }) => {
             const { user, token: authToken } = response.data.data;
 
             localStorage.setItem('token', authToken);
-            setUser(user);
+            setUser(flattenUser(user));
 
             toast.success('Login successful!');
             navigate('/dashboard');
@@ -156,6 +162,8 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
+        setUser,
+        checkAuth,
         loading,
         login,
         sendOTP,

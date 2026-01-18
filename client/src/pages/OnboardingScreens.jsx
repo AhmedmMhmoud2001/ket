@@ -141,7 +141,7 @@ const OnboardingScreens = () => {
             setImagePreview(
                 screen.image.startsWith('http')
                     ? screen.image
-                    : `http://localhost:5000${screen.image}`
+                    : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${screen.image}`
             );
         } else {
             setImagePreview(null);
@@ -214,7 +214,7 @@ const OnboardingScreens = () => {
                             <div className="relative">
                                 <div className="aspect-[9/16] bg-gray-100 overflow-hidden">
                                     <img
-                                        src={screen.image.startsWith('http') ? screen.image : `http://localhost:5000${screen.image}`}
+                                        src={screen.image.startsWith('http') ? screen.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${screen.image}`}
                                         alt={screen.title}
                                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                     />
@@ -222,11 +222,10 @@ const OnboardingScreens = () => {
                                 <div className="absolute top-3 right-3">
                                     <button
                                         onClick={() => toggleActive(screen.id)}
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
-                                            screen.isActive
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${screen.isActive
                                                 ? 'bg-green-500 text-white'
                                                 : 'bg-gray-500 text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {screen.isActive ? 'Active' : 'Inactive'}
                                     </button>

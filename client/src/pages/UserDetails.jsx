@@ -236,8 +236,18 @@ const UserDetails = () => {
                 <div className="space-y-6">
                     {/* User Avatar Card */}
                     <div className="card text-center">
-                        <div className="w-32 h-32 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-white font-bold text-4xl mx-auto mb-4 shadow-lg">
-                            {user.name?.charAt(0)?.toUpperCase() || <UserCircleIcon className="w-16 h-16" />}
+                        <div className="w-32 h-32 bg-gray-100 rounded-2xl flex items-center justify-center font-bold text-4xl mx-auto mb-4 shadow-lg overflow-hidden border-2 border-white">
+                            {user.avatar ? (
+                                <img
+                                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${user.avatar}`}
+                                    alt={user.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white">
+                                    {user.name?.charAt(0)?.toUpperCase() || <UserCircleIcon className="w-16 h-16" />}
+                                </div>
+                            )}
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-1">{user.name || 'No Name'}</h3>
                         <p className="text-sm text-gray-500">{user.email}</p>

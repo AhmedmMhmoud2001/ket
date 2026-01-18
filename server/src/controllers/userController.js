@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const bcrypt = require('bcryptjs');
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -66,6 +67,62 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+// Create user
+exports.createUser = async (req, res) => {
+    try {
+        const { name, email, phone, password, roleIds, isActive = true, avatar } = req.body;
+
+        if (!name || !email || !password || !phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide name, email, phone, and password'
+            });
+        }
+
+        // Check availability
+        const existingUser = await prisma.user.findFirst({
+            where: { OR: [{ email }, { phone }] }
+        });
+
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email or phone already in use'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                phone,
+                password: hashedPassword,
+                isActive,
+                avatar,
+                roles: roleIds && Array.isArray(roleIds) ? {
+                    create: roleIds.map(roleId => ({
+                        roleId: parseInt(roleId)
+                    }))
+                } : undefined
+            },
+            include: {
+                roles: { include: { role: true } }
+            }
+        });
+
+        const { password: _, ...userWithoutPassword } = user;
+        res.status(201).json({
+            success: true,
+            data: userWithoutPassword
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
 // Get user by ID
 exports.getUserById = async (req, res) => {
     try {
@@ -106,13 +163,28 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, phone, isActive } = req.body;
+        const { name, email, phone, isActive, roleIds, password, avatar } = req.body;
 
         const updateData = {};
         if (name !== undefined) updateData.name = name;
         if (email !== undefined) updateData.email = email;
         if (phone !== undefined) updateData.phone = phone;
         if (isActive !== undefined) updateData.isActive = isActive;
+        if (avatar !== undefined) updateData.avatar = avatar;
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        if (roleIds && Array.isArray(roleIds)) {
+            // Remove existing roles
+            await prisma.userRole.deleteMany({ where: { userId: id } });
+            // Add new roles
+            updateData.roles = {
+                create: roleIds.map(roleId => ({
+                    roleId: parseInt(roleId)
+                }))
+            };
+        }
 
         const user = await prisma.user.update({
             where: { id },

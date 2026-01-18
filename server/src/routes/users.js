@@ -9,6 +9,7 @@ router.use(protect);
 
 // Get all users (admin, manager)
 router.get('/', authorize('ADMIN', 'RESTAURANT_OWNER'), userController.getAllUsers);
+router.post('/', authorize('ADMIN'), userController.createUser);
 
 // Get all customers (End users)
 router.get('/customers', authorize('ADMIN', 'RESTAURANT_OWNER'), customerController.getAllCustomers);

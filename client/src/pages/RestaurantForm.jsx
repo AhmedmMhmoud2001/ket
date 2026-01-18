@@ -77,7 +77,7 @@ const RestaurantForm = () => {
                 setImagePreview(
                     data.imageUrl.startsWith('http')
                         ? data.imageUrl
-                        : `${import.meta.env.VITE_API_URL}${data.imageUrl}`
+                        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${data.imageUrl}`
                 );
             }
         } catch (error) {

@@ -7,6 +7,8 @@ import {
     PhoneIcon,
     ShieldCheckIcon,
     TrashIcon,
+    PlusIcon,
+    PencilSquareIcon,
     NoSymbolIcon,
     CheckCircleIcon,
     EyeIcon
@@ -19,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 const Users = () => {
     const { t } = useTranslation();
     const [users, setUsers] = useState([]);
+    const [roles, setRoles] = useState([]);
+    const [selectedRole, setSelectedRole] = useState('');
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [pagination, setPagination] = useState({
@@ -29,13 +33,34 @@ const Users = () => {
     });
 
     useEffect(() => {
+        fetchRoles();
+    }, []);
+
+    useEffect(() => {
         fetchUsers();
-    }, [search, pagination.page]);
+    }, [search, selectedRole, pagination.page]);
+
+    const fetchRoles = async () => {
+        try {
+            const res = await api.get('/roles');
+            setRoles(res.data.data.roles || []);
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/users?search=${search}&page=${pagination.page}&limit=${pagination.limit}`);
+            const queryParams = new URLSearchParams({
+                search,
+                page: pagination.page,
+                limit: pagination.limit
+            });
+            if (selectedRole) {
+                queryParams.append('roleId', selectedRole);
+            }
+            const res = await api.get(`/users?${queryParams.toString()}`);
             setUsers(res.data.data.users);
             if (res.data.data.pagination) {
                 setPagination(prev => ({ ...prev, ...res.data.data.pagination }));
@@ -70,29 +95,59 @@ const Users = () => {
     };
 
     const getRoleBadgeColor = (roles) => {
-        if (roles.includes('ADMIN')) return 'bg-red-100 text-red-700 border-red-200';
-        if (roles.includes('RESTAURANT_OWNER')) return 'bg-purple-100 text-purple-700 border-purple-200';
-        if (roles.includes('DRIVER')) return 'bg-blue-100 text-blue-700 border-blue-200';
+        if (!roles) return 'bg-gray-100 text-gray-700 border-gray-200';
+        const roleStr = roles.join(',').toUpperCase();
+        if (roleStr.includes('ADMIN')) return 'bg-red-100 text-red-700 border-red-200';
+        if (roleStr.includes('RESTAURANT_OWNER')) return 'bg-purple-100 text-purple-700 border-purple-200';
+        if (roleStr.includes('DRIVER')) return 'bg-blue-100 text-blue-700 border-blue-200';
         return 'bg-gray-100 text-gray-700 border-gray-200';
     };
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
-                <p className="text-gray-500">Manage all system users and their roles</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
+                    <p className="text-gray-500">Manage all system users and their roles</p>
+                </div>
+                <Link to="/users/new" className="btn btn-primary">
+                    <PlusIcon className="w-5 h-5 mr-1" />
+                    {t('common.add')} User
+                </Link>
             </div>
 
             <div className="card">
-                <div className="relative mb-4">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        className="input pl-10"
-                        placeholder="Search by name, email or phone..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                            type="text"
+                            className="input pl-10"
+                            placeholder="Search by name, email or phone..."
+                            value={search}
+                            onChange={e => {
+                                setSearch(e.target.value);
+                                setPagination(prev => ({ ...prev, page: 1 }));
+                            }}
+                        />
+                    </div>
+                    <div className="w-full md:w-64">
+                        <select
+                            className="input"
+                            value={selectedRole}
+                            onChange={e => {
+                                setSelectedRole(e.target.value);
+                                setPagination(prev => ({ ...prev, page: 1 }));
+                            }}
+                        >
+                            <option value="">All Roles</option>
+                            {roles.map(role => (
+                                <option key={role.id} value={role.id}>
+                                    {role.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -122,13 +177,27 @@ const Users = () => {
                                     </td>
                                 </tr>
                             ) : users.map(user => {
-                                const userRoles = user.roles?.map(ur => ur.role?.name || ur.roleName) || [];
+                                const userRoles = user.roleNames || user.roles?.map(ur => ur.role?.name || ur.roleName) || [];
                                 return (
                                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold uppercase">
-                                                    {user.name?.charAt(0) || <UserCircleIcon className="w-6 h-6" />}
+                                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold uppercase overflow-hidden">
+                                                    {user.avatar ? (
+                                                        <img
+                                                            src={user.avatar.startsWith('http')
+                                                                ? user.avatar
+                                                                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${user.avatar}`}
+                                                            alt={user.name}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = ''; // Fallback
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        user.name?.charAt(0) || <UserCircleIcon className="w-6 h-6" />
+                                                    )}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="font-semibold text-gray-900 truncate">{user.name}</div>
@@ -164,6 +233,13 @@ const Users = () => {
                                                     title="View Details"
                                                 >
                                                     <EyeIcon className="w-5 h-5" />
+                                                </Link>
+                                                <Link
+                                                    to={`/users/${user.id}/edit`}
+                                                    className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                                    title="Edit User"
+                                                >
+                                                    <PencilSquareIcon className="w-5 h-5" />
                                                 </Link>
                                                 <button
                                                     onClick={() => toggleUserStatus(user.id, user.isActive)}

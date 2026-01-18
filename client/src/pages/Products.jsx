@@ -125,7 +125,7 @@ const Products = () => {
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {product.images && product.images.length > 0 ? (
                                                     <img
-                                                        src={product.images[0]?.imageUrl?.startsWith('http') ? product.images[0].imageUrl : `${import.meta.env.VITE_API_URL}${product.images[0].imageUrl}`}
+                                                        src={product.images[0]?.imageUrl?.startsWith('http') ? product.images[0].imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${product.images[0].imageUrl}`}
                                                         alt={product.nameEn || product.nameAr}
                                                         className="w-full h-full object-cover"
                                                     />

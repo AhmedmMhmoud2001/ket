@@ -123,7 +123,7 @@ const Categories = () => {
                                                     <img
                                                         src={(category.imageUrl || category.image_url).startsWith('http')
                                                             ? (category.imageUrl || category.image_url)
-                                                            : `${import.meta.env.VITE_API_URL}${category.imageUrl || category.image_url}`}
+                                                            : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${category.imageUrl || category.image_url}`}
                                                         alt={category.nameEn}
                                                         className="w-full h-full object-cover"
                                                     />

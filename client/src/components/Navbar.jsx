@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 const Navbar = ({ toggleSidebar }) => {
     const { user, logout } = useAuth();
     const { i18n, t } = useTranslation();
-    
+
     const changeLanguage = (lng) => {
         i18n.changeLanguage(lng);
         document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
@@ -85,10 +85,28 @@ const Navbar = ({ toggleSidebar }) => {
                     <Menu as="div" className="relative">
                         <Menu.Button className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'} p-2 rounded-lg hover:bg-gray-100`}>
                             <div className={`${i18n.language === 'ar' ? 'text-left' : 'text-right'} hidden sm:block`}>
-                                <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
-                                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                                <p className="text-sm font-medium text-gray-900">{user?.name || user?.full_name}</p>
+                                <p className="text-xs text-gray-500 capitalize">
+                                    {Array.isArray(user?.roles) ? user?.roles[0] : (typeof user?.role === 'string' ? user?.role : 'USER')}
+                                </p>
                             </div>
-                            <UserCircleIcon className="w-8 h-8 text-gray-600" />
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                                {user?.avatar ? (
+                                    <img
+                                        src={user.avatar.startsWith('http')
+                                            ? user.avatar
+                                            : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${user.avatar}`}
+                                        alt={user.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = '';
+                                        }}
+                                    />
+                                ) : (
+                                    <UserCircleIcon className="w-8 h-8 text-gray-600" />
+                                )}
+                            </div>
                         </Menu.Button>
 
                         <Transition

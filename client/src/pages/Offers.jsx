@@ -122,29 +122,29 @@ const Offers = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate dates
         if (formData.start_date && formData.end_date) {
             const startDate = new Date(formData.start_date);
             const endDate = new Date(formData.end_date);
-            
+
             if (startDate > endDate) {
                 toast.error('Start date cannot be after end date');
                 return;
             }
         }
-        
+
         // Validate discount value
         if (formData.discount_type === 'PERCENTAGE' && parseFloat(formData.discount_value) > 100) {
             toast.error('Discount percentage cannot be greater than 100%');
             return;
         }
-        
+
         if (parseFloat(formData.discount_value) <= 0) {
             toast.error('Discount value must be greater than 0');
             return;
         }
-        
+
         try {
             // Upload image first if new image selected
             const imageUrl = await uploadImage();
@@ -187,18 +187,18 @@ const Offers = () => {
             end_date: offer.end_date?.split('T')[0] || '',
             is_active: offer.is_active
         });
-        
+
         // Set image preview
         if (offer.image_url) {
             setImagePreview(
                 offer.image_url.startsWith('http')
                     ? offer.image_url
-                    : `http://localhost:5000${offer.image_url}`
+                    : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${offer.image_url}`
             );
         } else {
             setImagePreview(null);
         }
-        
+
         setIsModalOpen(true);
     };
 
@@ -299,10 +299,10 @@ const Offers = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {offer.image_url ? (
-                                                    <img 
-                                                        src={offer.image_url.startsWith('http') ? offer.image_url : `http://localhost:5000${offer.image_url}`} 
-                                                        alt={offer.title} 
-                                                        className="w-full h-full object-cover" 
+                                                    <img
+                                                        src={offer.image_url.startsWith('http') ? offer.image_url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${offer.image_url}`}
+                                                        alt={offer.title}
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 ) : (
                                                     <TagIcon className="w-8 h-8 text-gray-400" />
@@ -324,14 +324,14 @@ const Offers = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
                                             <span className="font-bold text-lg text-primary-600">
-                                                {offer.discount_type === 'PERCENTAGE' ? `${offer.discount_value}%` : 
-                                                 offer.discount_type === 'BUY_ONE_GET_ONE' ? 'BOGO' : 
-                                                 `$${offer.discount_value}`}
+                                                {offer.discount_type === 'PERCENTAGE' ? `${offer.discount_value}%` :
+                                                    offer.discount_type === 'BUY_ONE_GET_ONE' ? 'BOGO' :
+                                                        `$${offer.discount_value}`}
                                             </span>
                                             <span className="text-xs text-gray-500 uppercase">
-                                                {offer.discount_type === 'PERCENTAGE' ? 'OFF' : 
-                                                 offer.discount_type === 'BUY_ONE_GET_ONE' ? 'DEAL' : 
-                                                 'DISCOUNT'}
+                                                {offer.discount_type === 'PERCENTAGE' ? 'OFF' :
+                                                    offer.discount_type === 'BUY_ONE_GET_ONE' ? 'DEAL' :
+                                                        'DISCOUNT'}
                                             </span>
                                             {offer.min_order_amount > 0 && (
                                                 <span className="text-xs text-gray-400 mt-1">
@@ -369,15 +369,15 @@ const Offers = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button 
-                                                onClick={() => openEdit(offer)} 
+                                            <button
+                                                onClick={() => openEdit(offer)}
                                                 className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
                                                 <PencilSquareIcon className="w-5 h-5" />
                                             </button>
-                                            <button 
-                                                onClick={() => handleDelete(offer.id)} 
+                                            <button
+                                                onClick={() => handleDelete(offer.id)}
                                                 className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 title="Delete"
                                             >
@@ -473,14 +473,14 @@ const Offers = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Discount Value *</label>
-                                    <input 
-                                        required 
-                                        type="number" 
-                                        step="0.01" 
+                                    <input
+                                        required
+                                        type="number"
+                                        step="0.01"
                                         min="0.01"
                                         max={formData.discount_type === 'PERCENTAGE' ? 100 : undefined}
-                                        className="input" 
-                                        value={formData.discount_value} 
+                                        className="input"
+                                        value={formData.discount_value}
                                         onChange={e => {
                                             const value = e.target.value;
                                             if (formData.discount_type === 'PERCENTAGE' && parseFloat(value) > 100) {
@@ -514,11 +514,11 @@ const Offers = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Start Date *</label>
-                                    <input 
-                                        required 
-                                        type="date" 
-                                        className="input" 
-                                        value={formData.start_date} 
+                                    <input
+                                        required
+                                        type="date"
+                                        className="input"
+                                        value={formData.start_date}
                                         onChange={e => {
                                             const newStartDate = e.target.value;
                                             setFormData({ ...formData, start_date: newStartDate });
@@ -532,11 +532,11 @@ const Offers = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">End Date *</label>
-                                    <input 
-                                        required 
-                                        type="date" 
-                                        className="input" 
-                                        value={formData.end_date} 
+                                    <input
+                                        required
+                                        type="date"
+                                        className="input"
+                                        value={formData.end_date}
                                         onChange={e => {
                                             const newEndDate = e.target.value;
                                             setFormData({ ...formData, end_date: newEndDate });

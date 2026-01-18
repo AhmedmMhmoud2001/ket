@@ -43,14 +43,14 @@ const AboutApp = () => {
                 });
                 if (data.imageEn) {
                     setImagePreview({
-                        en: data.imageEn.startsWith('http') ? data.imageEn : `http://localhost:5000${data.imageEn}`,
+                        en: data.imageEn.startsWith('http') ? data.imageEn : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${data.imageEn}`,
                         ar: imagePreview.ar
                     });
                 }
                 if (data.imageAr) {
                     setImagePreview({
                         en: imagePreview.en,
-                        ar: data.imageAr.startsWith('http') ? data.imageAr : `http://localhost:5000${data.imageAr}`
+                        ar: data.imageAr.startsWith('http') ? data.imageAr : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${data.imageAr}`
                     });
                 }
             }
@@ -102,7 +102,7 @@ const AboutApp = () => {
     const handleSave = async () => {
         try {
             setSaving(true);
-            
+
             // Upload images if new ones selected
             const imageEn = await uploadImage('en');
             const imageAr = await uploadImage('ar');
@@ -173,7 +173,7 @@ const AboutApp = () => {
                         {/* English Section */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-700">English</h3>
-                            
+
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-4">
                                 {imagePreview.en ? (
                                     <div className="relative">
@@ -240,7 +240,7 @@ const AboutApp = () => {
                         {/* Arabic Section */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-700">العربية</h3>
-                            
+
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-4">
                                 {imagePreview.ar ? (
                                     <div className="relative">

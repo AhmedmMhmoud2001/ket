@@ -142,7 +142,7 @@ const Restaurants = () => {
                                 {/* Restaurant Image */}
                                 <div className="relative h-48 bg-gray-200 rounded-t-lg overflow-hidden">
                                     {restaurant.imageUrl ? (
-                                        <img src={restaurant.imageUrl.startsWith('http') ? restaurant.imageUrl : `${import.meta.env.VITE_API_URL}${restaurant.imageUrl}`} alt={getName(restaurant)} className="w-full h-full object-cover" />
+                                        <img src={restaurant.imageUrl.startsWith('http') ? restaurant.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${restaurant.imageUrl}`} alt={getName(restaurant)} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <BuildingStorefrontIcon className="w-16 h-16 text-gray-400" />

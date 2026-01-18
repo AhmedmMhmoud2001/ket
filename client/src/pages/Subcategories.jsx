@@ -109,7 +109,7 @@ const Subcategories = () => {
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {sub.image ? (
                                                     <img
-                                                        src={sub.image.startsWith('http') ? sub.image : `http://localhost:5000${sub.image}`}
+                                                        src={sub.image.startsWith('http') ? sub.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${sub.image}`}
                                                         alt={sub.name}
                                                         className="w-full h-full object-cover"
                                                     />

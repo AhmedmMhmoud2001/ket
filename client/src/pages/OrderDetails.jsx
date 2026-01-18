@@ -250,17 +250,17 @@ const OrderDetails = () => {
                                                 </p>
                                                 {item.product?.images?.[0] && (
                                                     <img
-                                                        src={item.product.images[0].startsWith('http') 
-                                                            ? item.product.images[0] 
-                                                            : `http://localhost:5000${item.product.images[0]}`}
+                                                        src={item.product.images[0].startsWith('http')
+                                                            ? item.product.images[0]
+                                                            : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${item.product.images[0]}`}
                                                         alt={item.product.name}
                                                         className="w-16 h-16 object-cover rounded mt-2"
                                                     />
                                                 )}
                                                 {item.extras && (
                                                     <p className="text-sm text-gray-500 mt-1">
-                                                        Extras: {typeof item.extras === 'string' 
-                                                            ? item.extras 
+                                                        Extras: {typeof item.extras === 'string'
+                                                            ? item.extras
                                                             : JSON.stringify(item.extras)}
                                                     </p>
                                                 )}
@@ -379,7 +379,7 @@ const OrderDetails = () => {
                                         <img
                                             src={order.driver.user.avatar.startsWith('http')
                                                 ? order.driver.user.avatar
-                                                : `http://localhost:5000${order.driver.user.avatar}`}
+                                                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${order.driver.user.avatar}`}
                                             alt="Driver"
                                             className="w-12 h-12 rounded-full object-cover"
                                         />
@@ -455,7 +455,7 @@ const OrderDetails = () => {
                                     <img
                                         src={order.restaurant.logo.startsWith('http')
                                             ? order.restaurant.logo
-                                            : `http://localhost:5000${order.restaurant.logo}`}
+                                            : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${order.restaurant.logo}`}
                                         alt={order.restaurant.name}
                                         className="w-20 h-20 object-cover rounded-lg mb-3"
                                     />
