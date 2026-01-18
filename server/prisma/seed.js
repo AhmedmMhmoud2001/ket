@@ -88,8 +88,8 @@ async function main() {
   console.log('Creating 10 users...');
   const users = [];
   for (let i = 1; i <= 10; i++) {
-    // Make first user a Restaurant Owner for testing
-    const roleToAssign = i === 1 ? 'RESTAURANT_OWNER' : 'CUSTOMER';
+    // Make first 5 users Restaurant Owners
+    const roleToAssign = i <= 5 ? 'RESTAURANT_OWNER' : 'CUSTOMER';
 
     const user = await prisma.user.create({
       data: {
@@ -137,19 +137,39 @@ async function main() {
     console.log(`✅ Created Category: ${category.nameEn}`);
   }
 
-  // 5. Create a Restaurant to house subcategories and products
-  console.log('Creating a main restaurant...');
-  const restaurant = await prisma.restaurant.create({
-    data: {
-      nameAr: 'مطعم التك البرمجي',
-      nameEn: 'Tak Software Restaurant',
-      phone: '987654321',
-      deliveryType: 'MOTORCYCLE',
-      categoryId: categories[0].id,
-      ownerId: users[0].id,
-      isActive: true
-    }
-  });
+  // 5. Create multiple restaurants
+  console.log('Creating sample restaurants...');
+  const restaurantData = [
+    { nameAr: 'مطعم التك البرمجي', nameEn: 'Tak Software Restaurant', catIdx: 0 },
+    { nameAr: 'بيتزا بريمو', nameEn: 'Pizza Primo', catIdx: 1 },
+    { nameAr: 'سوشي هاوس', nameEn: 'Sushi House', catIdx: 7 },
+    { nameAr: 'برجر كينج كونج', nameEn: 'Burger King Kong', catIdx: 0 },
+    { nameAr: 'قصر الشواء', nameEn: 'Grill Palace', catIdx: 5 },
+    { nameAr: 'حلويات الشرق', nameEn: 'Oriental Sweets', catIdx: 3 },
+    { nameAr: 'هيلثي لايف', nameEn: 'Healthy Life', catIdx: 6 },
+    { nameAr: 'سي فود جاردن', nameEn: 'Seafood Garden', catIdx: 2 }
+  ];
+
+  const createdRestaurants = [];
+  for (let i = 0; i < restaurantData.length; i++) {
+    const data = restaurantData[i];
+    const res = await prisma.restaurant.create({
+      data: {
+        nameAr: data.nameAr,
+        nameEn: data.nameEn,
+        phone: `98765432${i}`,
+        deliveryType: 'MOTORCYCLE',
+        categoryId: categories[data.catIdx].id,
+        ownerId: users[i % 5].id, // Distribute among first 5 users
+        isActive: true,
+        rating: 4.0 + (Math.random() * 1.0)
+      }
+    });
+    createdRestaurants.push(res);
+    console.log(`✅ Created Restaurant: ${res.nameEn}`);
+  }
+
+  const restaurant = createdRestaurants[0]; // Keep for backwards compatibility with the rest of the script
 
   // 6. Create 12 Subcategories
   console.log('Creating 12 subcategories...');
@@ -159,7 +179,7 @@ async function main() {
       data: {
         nameAr: `قسم فرعي ${i}`,
         nameEn: `Subcategory ${i}`,
-        restaurantId: restaurant.id,
+        categoryId: categories[0].id,
         isActive: true
       }
     });
@@ -256,6 +276,80 @@ async function main() {
       }
     });
     console.log(`✅ Created Driver: ${driverUser.email}`);
+  }
+
+  // 11. Create 15 Sample Orders
+  console.log('Creating 15 sample orders...');
+  const statuses = ['pending', 'preparing', 'ready', 'on_the_way', 'delivered', 'cancelled'];
+  const userAddresses = [];
+
+  // Create some addresses for users first
+  for (const user of users.slice(1)) { // skip owner
+    const address = await prisma.userAddress.create({
+      data: {
+        userId: user.id,
+        address: '123 Test St, City',
+        lat: 24.7136,
+        lng: 46.6753,
+        type: 'home',
+        isDefault: true
+      }
+    });
+    userAddresses.push(address);
+  }
+
+  for (let i = 0; i < 15; i++) {
+    const status = statuses[i % statuses.length];
+    const user = users[1 + (i % 9)]; // users 2-10 are customers
+    const address = userAddresses[i % userAddresses.length];
+    const orderProducts = products.slice(0, 3); // random 3 products
+
+    let total = 0;
+    const orderItemsData = orderProducts.map(p => {
+      const qty = Math.floor(Math.random() * 3) + 1;
+      total += p.price * qty;
+      return {
+        productId: p.id,
+        quantity: qty,
+        price: p.price
+      };
+    });
+
+    const order = await prisma.foodOrder.create({
+      data: {
+        userId: user.id,
+        restaurantId: restaurant.id,
+        addressId: address.id,
+        status: status,
+        totalPrice: total,
+        notes: `Sample order ${i + 1}`,
+        createdAt: new Date(Date.now() - (15 - i) * 24 * 60 * 60 * 1000), // Spaced out over 15 days
+        items: {
+          create: orderItemsData
+        }
+      }
+    });
+
+    // Create status history
+    await prisma.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        status: 'pending',
+        notes: 'Order placed'
+      }
+    });
+
+    if (status !== 'pending') {
+      await prisma.orderStatusHistory.create({
+        data: {
+          orderId: order.id,
+          status: status,
+          notes: `Status updated to ${status}`
+        }
+      });
+    }
+
+    console.log(`✅ Created Order: ${order.id} (${status})`);
   }
 
   console.log('🎉 Seeding successfully completed!');

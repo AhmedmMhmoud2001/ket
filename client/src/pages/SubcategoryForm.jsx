@@ -48,16 +48,16 @@ const SubcategoryForm = () => {
             const response = await api.get(`/subcategories/${id}`);
             const data = response.data.data;
             setFormData({
-                category_id: data.categoryId || data.category_id || '',
-                name: data.name || '',
-                name_ar: data.nameAr || data.name_ar || '',
-                sort_order: data.sortOrder || data.sort_order || 0,
-                is_active: data.isActive !== undefined ? data.isActive : data.is_active !== undefined ? data.is_active : true,
-                image_url: data.image || data.image_url || ''
+                category_id: data.categoryId || '',
+                name: data.nameEn || '',
+                name_ar: data.nameAr || '',
+                sort_order: data.sortOrder || 0,
+                is_active: data.isActive !== undefined ? data.isActive : true,
+                image_url: data.imageUrl || ''
             });
 
-            if (data.image || data.image_url) {
-                const imageUrl = (data.image || data.image_url);
+            if (data.imageUrl) {
+                const imageUrl = data.imageUrl;
                 setImagePreview(
                     imageUrl.startsWith('http')
                         ? imageUrl

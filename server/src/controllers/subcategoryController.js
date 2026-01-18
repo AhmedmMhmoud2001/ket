@@ -4,7 +4,7 @@ const { deleteFile } = require('../utils/fileHandler');
 // Get all subcategories with filtering
 exports.getAllSubcategories = async (req, res) => {
     try {
-        const { search, restaurant_id, is_active, page = 1, limit = 10 } = req.query;
+        const { search, category_id, is_active, page = 1, limit = 10 } = req.query;
         const skip = (page - 1) * limit;
         const take = parseInt(limit);
 
@@ -17,8 +17,8 @@ exports.getAllSubcategories = async (req, res) => {
             ];
         }
 
-        if (restaurant_id) {
-            where.restaurantId = restaurant_id;
+        if (category_id) {
+            where.categoryId = category_id;
         }
 
         if (is_active !== undefined) {
@@ -29,14 +29,14 @@ exports.getAllSubcategories = async (req, res) => {
             prisma.subcategory.findMany({
                 where,
                 include: {
-                    restaurant: {
+                    category: {
                         select: {
                             nameEn: true,
                             nameAr: true
                         }
                     }
                 },
-                orderBy: { id: 'desc' },
+                orderBy: { sortOrder: 'asc' },
                 skip,
                 take
             }),
@@ -46,7 +46,7 @@ exports.getAllSubcategories = async (req, res) => {
         // Format response
         const formattedSubcategories = subcategories.map(sub => ({
             ...sub,
-            restaurant_name: sub.restaurant?.nameEn || sub.restaurant?.nameAr
+            category_name: sub.category?.nameEn || sub.category?.nameAr
         }));
 
         res.json({
@@ -75,7 +75,7 @@ exports.getSubcategoryById = async (req, res) => {
         const subcategory = await prisma.subcategory.findUnique({
             where: { id },
             include: {
-                restaurant: {
+                category: {
                     select: {
                         id: true,
                         nameEn: true,
@@ -105,17 +105,19 @@ exports.getSubcategoryById = async (req, res) => {
 // Create Subcategory
 exports.createSubcategory = async (req, res) => {
     try {
-        const { restaurant_id, name_en, name_ar, is_active } = req.body;
+        const { category_id, name, name_ar, is_active, sort_order, image_url } = req.body;
 
-        if (!restaurant_id || !name_en || !name_ar) {
-            return res.status(400).json({ success: false, message: 'Restaurant, Name (EN) and Name (AR) are required' });
+        if (!category_id || !name) {
+            return res.status(400).json({ success: false, message: 'Category and Name are required' });
         }
 
         const subcategory = await prisma.subcategory.create({
             data: {
-                restaurantId: restaurant_id,
-                nameEn: name_en,
-                nameAr: name_ar,
+                categoryId: category_id,
+                nameEn: name,
+                nameAr: name_ar || name,
+                imageUrl: image_url,
+                sortOrder: sort_order ? parseInt(sort_order) : 0,
                 isActive: is_active !== undefined ? is_active : true
             }
         });
@@ -135,7 +137,7 @@ exports.createSubcategory = async (req, res) => {
 exports.updateSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { restaurant_id, name_en, name_ar, is_active } = req.body;
+        const { category_id, name, name_ar, is_active, sort_order, image_url } = req.body;
 
         const existingSubcategory = await prisma.subcategory.findUnique({
             where: { id }
@@ -149,10 +151,12 @@ exports.updateSubcategory = async (req, res) => {
         }
 
         const updateData = {};
-        if (restaurant_id !== undefined) updateData.restaurantId = restaurant_id;
-        if (name_en !== undefined) updateData.nameEn = name_en;
+        if (category_id !== undefined) updateData.categoryId = category_id;
+        if (name !== undefined) updateData.nameEn = name;
         if (name_ar !== undefined) updateData.nameAr = name_ar;
         if (is_active !== undefined) updateData.isActive = is_active;
+        if (sort_order !== undefined) updateData.sortOrder = parseInt(sort_order);
+        if (image_url !== undefined) updateData.imageUrl = image_url;
 
         const subcategory = await prisma.subcategory.update({
             where: { id },
@@ -206,7 +210,7 @@ exports.toggleSubcategory = async (req, res) => {
 exports.deleteSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const subcategory = await prisma.subcategory.findUnique({
             where: { id },
             include: {
@@ -229,11 +233,16 @@ exports.deleteSubcategory = async (req, res) => {
             });
         }
 
+        // Delete image if exists
+        if (subcategory.imageUrl) {
+            await deleteFile(subcategory.imageUrl);
+        }
+
         // Delete subcategory
         await prisma.subcategory.delete({
             where: { id }
         });
-        
+
         res.json({ success: true, message: 'Subcategory deleted successfully' });
     } catch (error) {
         console.error('Error deleting subcategory:', error);

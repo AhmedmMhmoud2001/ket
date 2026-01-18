@@ -5,6 +5,7 @@ import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
+import OrderForm from './pages/OrderForm';
 import OrderDetails from './pages/OrderDetails';
 import OrderTracking from './pages/OrderTracking';
 import Drivers from './pages/Drivers';
@@ -77,6 +78,7 @@ function App() {
 
                         {/* Admin Routes */}
                         <Route path="orders" element={<Orders />} />
+                        <Route path="orders/new" element={<OrderForm />} />
                         <Route path="orders/:id" element={<OrderDetails />} />
                         <Route path="tracking/:id" element={<OrderTracking />} />
                         <Route path="drivers" element={<Drivers />} />

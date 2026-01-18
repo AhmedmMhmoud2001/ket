@@ -9,6 +9,9 @@ router.use(protect);
 // Get all orders
 router.get('/', authorize('ADMIN', 'RESTAURANT_OWNER'), orderController.getAllOrders);
 
+// Create new order
+router.post('/', authorize('ADMIN'), orderController.createOrder);
+
 // Get order by ID
 router.get('/:id', authorize('ADMIN', 'RESTAURANT_OWNER'), orderController.getOrderById);
 

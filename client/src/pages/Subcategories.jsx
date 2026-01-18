@@ -107,10 +107,10 @@ const Subcategories = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {sub.image ? (
+                                                {sub.imageUrl ? (
                                                     <img
-                                                        src={sub.image.startsWith('http') ? sub.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${sub.image}`}
-                                                        alt={sub.name}
+                                                        src={sub.imageUrl.startsWith('http') ? sub.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}${sub.imageUrl}`}
+                                                        alt={sub.nameEn}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
@@ -118,14 +118,14 @@ const Subcategories = () => {
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-gray-900">{sub.name}</div>
+                                                <div className="font-semibold text-gray-900">{sub.nameEn}</div>
                                                 <div className="text-sm text-gray-500 font-medium">{sub.nameAr}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold uppercase">
-                                            {sub.category?.name || 'N/A'}
+                                            {sub.category_name || 'N/A'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 font-mono text-sm text-gray-600">

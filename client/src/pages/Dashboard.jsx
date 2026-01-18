@@ -200,8 +200,8 @@ const Dashboard = () => {
                 {/* Order Status Distribution (Bar Chart) */}
                 <div className="card">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Order Status Distribution</h2>
-                    <div className="h-80 min-h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                    <div className="h-[300px] w-full relative">
+                        <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={orderStatusData.length > 0 ? orderStatusData : [{ name: 'No Data', value: 0 }]}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
@@ -216,8 +216,8 @@ const Dashboard = () => {
                 {/* Order Trends (Line Chart) */}
                 <div className="card">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Order Trends (7 Days)</h2>
-                    <div className="h-80 min-h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                    <div className="h-[300px] w-full relative">
+                        <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={orderTrendsData.length > 0 ? orderTrendsData : []}>
                                 <defs>
                                     <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
@@ -226,9 +226,9 @@ const Dashboard = () => {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis 
-                                    dataKey="date" 
-                                    axisLine={false} 
+                                <XAxis
+                                    dataKey="date"
+                                    axisLine={false}
                                     tickLine={false}
                                     tickFormatter={(str) => {
                                         const date = new Date(str);
@@ -240,10 +240,10 @@ const Dashboard = () => {
                                     formatter={(value) => [value, 'Orders']}
                                     labelFormatter={(label) => new Date(label).toLocaleDateString()}
                                 />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="orders" 
-                                    stroke="#3b82f6" 
+                                <Line
+                                    type="monotone"
+                                    dataKey="orders"
+                                    stroke="#3b82f6"
                                     strokeWidth={2}
                                     dot={{ fill: '#3b82f6', r: 4 }}
                                     activeDot={{ r: 6 }}
@@ -259,8 +259,8 @@ const Dashboard = () => {
                     {/* Revenue Chart */}
                     <div className="card">
                         <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.revenueAnalytics')}</h2>
-                        <div className="h-80 min-h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                        <div className="h-[300px] w-full relative">
+                            <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -324,10 +324,10 @@ const Dashboard = () => {
                                                 <td className="px-4 py-3 text-sm text-gray-600">{order.customer_name}</td>
                                                 <td className="px-4 py-3">
                                                     <span className={`px-2 py-1 text-xs font-semibold rounded ${order.status === 'preparing' ? 'bg-orange-100 text-orange-600' :
-                                                            order.status === 'ready' ? 'bg-blue-100 text-blue-600' :
-                                                                order.status === 'on_the_way' ? 'bg-purple-100 text-purple-600' :
-                                                                    order.status === 'delivered' ? 'bg-green-100 text-green-600' :
-                                                                        'bg-gray-100 text-gray-600'
+                                                        order.status === 'ready' ? 'bg-blue-100 text-blue-600' :
+                                                            order.status === 'on_the_way' ? 'bg-purple-100 text-purple-600' :
+                                                                order.status === 'delivered' ? 'bg-green-100 text-green-600' :
+                                                                    'bg-gray-100 text-gray-600'
                                                         }`}>
                                                         {t(`orders.${order.status === 'on_the_way' ? 'onTheWay' : order.status}`) || order.status.replace(/_/g, ' ')}
                                                     </span>
@@ -350,8 +350,8 @@ const Dashboard = () => {
                     {/* Order Sources (Pie Chart) */}
                     <div className="card flex flex-col items-center justify-center">
                         <h2 className="text-lg font-bold text-gray-900 mb-4 w-full text-left">{t('dashboard.paymentMethods')}</h2>
-                        <div className="h-64 w-full relative min-h-[200px]">
-                            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+                        <div className="h-[250px] w-full relative">
+                            <ResponsiveContainer width="100%" height={250}>
                                 <PieChart>
                                     <Pie
                                         data={orderSources}
@@ -387,8 +387,8 @@ const Dashboard = () => {
                                 <p className="text-gray-500 text-center py-4">{t('dashboard.noRecentActivity')}</p>
                             ) : (
                                 recentActivities.map((activity, index) => (
-                                        <div key={index} className={`flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                            <div className={`flex items-center ${isRTL ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
+                                    <div key={index} className={`flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                        <div className={`flex items-center ${isRTL ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
                                             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                                                 <ShoppingBagIcon className="w-5 h-5 text-gray-600" />
                                             </div>

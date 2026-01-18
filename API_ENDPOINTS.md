@@ -296,6 +296,34 @@ Base URL: `http://localhost:5000/api`
 - **Headers:** `Authorization: Bearer <token>`
 - **Query:** `?status=PENDING&payment_status=PAID&search=xxx&page=1&limit=20`
 
+### Create Order (Admin)
+- **POST** `/api/orders`
+- **Headers:** `Authorization: Bearer <token>`
+- **Body:**
+- ```json
+- {
+-   "userId": "user-uuid",
+-   "restaurantId": "restaurant-uuid",
+-   "addressId": "address-uuid",
+-   "status": "pending",
+-   "totalPrice": 45.50,
+-   "tip": 5.0,
+-   "notes": "Fast delivery please",
+-   "items": [
+-     {
+-       "productId": "product-uuid",
+-       "quantity": 2,
+-       "price": 20.0
+-     },
+-     {
+-       "productId": "product-uuid-2",
+-       "quantity": 1,
+-       "price": 5.50
+-     }
+-   ]
+- }
+- ```
+
 ### Get Order Statistics
 - **GET** `/api/orders/stats`
 - **Headers:** `Authorization: Bearer <token>`

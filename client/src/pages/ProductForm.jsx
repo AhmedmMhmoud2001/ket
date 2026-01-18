@@ -41,13 +41,18 @@ const ProductForm = () => {
     }, [id]);
 
     useEffect(() => {
-        if (formData.restaurantId) {
-            const filtered = allSubcategories.filter(sub => sub.restaurantId === formData.restaurantId);
-            setSubcategories(filtered);
+        if (formData.restaurantId && restaurants.length > 0) {
+            const restaurant = restaurants.find(r => r.id === formData.restaurantId);
+            if (restaurant) {
+                const filtered = allSubcategories.filter(sub => sub.categoryId === restaurant.categoryId);
+                setSubcategories(filtered);
+            } else {
+                setSubcategories([]);
+            }
         } else {
             setSubcategories([]);
         }
-    }, [formData.restaurantId, allSubcategories]);
+    }, [formData.restaurantId, allSubcategories, restaurants]);
 
     const fetchInitialData = async () => {
         try {

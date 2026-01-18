@@ -498,3 +498,67 @@ exports.reorder = async (req, res) => {
         });
     }
 };
+// Create new order (Admin)
+exports.createOrder = async (req, res) => {
+    try {
+        const { userId, restaurantId, addressId, items, status = 'pending', notes, totalPrice, tip } = req.body;
+
+        if (!userId || !restaurantId || !addressId || !items || !items.length) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields (userId, restaurantId, addressId, items) are required'
+            });
+        }
+
+        const order = await prisma.foodOrder.create({
+            data: {
+                userId,
+                restaurantId,
+                addressId,
+                status,
+                totalPrice: parseFloat(totalPrice),
+                tip: tip ? parseFloat(tip) : null,
+                notes: notes || null,
+                items: {
+                    create: items.map(item => ({
+                        productId: item.productId,
+                        quantity: parseInt(item.quantity),
+                        price: parseFloat(item.price)
+                    }))
+                }
+            },
+            include: {
+                items: {
+                    include: {
+                        product: true
+                    }
+                },
+                user: true,
+                restaurant: true
+            }
+        });
+
+        // Create initial status history
+        await prisma.orderStatusHistory.create({
+            data: {
+                orderId: order.id,
+                status,
+                userId: req.user.id,
+                notes: 'Order created manually by admin'
+            }
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Order created successfully',
+            data: order
+        });
+    } catch (error) {
+        console.error('Create order error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error creating order',
+            error: error.message
+        });
+    }
+};

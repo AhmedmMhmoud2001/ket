@@ -69,12 +69,7 @@ exports.getRestaurantById = async (req, res) => {
             where: { id },
             include: {
                 category: true,
-                owner: { select: { id: true, name: true, phone: true } },
-                subcategories: {
-                    include: {
-                        products: true
-                    }
-                }
+                owner: { select: { id: true, name: true, phone: true } }
             }
         });
 
@@ -98,6 +93,68 @@ exports.getRestaurantById = async (req, res) => {
         });
     }
 };
+
+// Helper to sync user role based on restaurant ownership and management
+async function syncUserRestaurantRole(userId) {
+    if (!userId) return;
+    try {
+        const [ownerRole, adminRole, customerRole] = await Promise.all([
+            prisma.role.findUnique({ where: { name: 'RESTAURANT_OWNER' } }),
+            prisma.role.findUnique({ where: { name: 'RESTAURANT_ADMIN' } }),
+            prisma.role.findUnique({ where: { name: 'CUSTOMER' } })
+        ]);
+
+        if (!ownerRole || !adminRole || !customerRole) return;
+
+        // Check responsibilities
+        const [ownedCount, managedCount] = await Promise.all([
+            prisma.restaurant.count({ where: { ownerId: userId } }),
+            prisma.restaurant.count({ where: { adminId: userId } })
+        ]);
+
+        const rolesToHave = [];
+        const rolesToRemove = [];
+
+        if (ownedCount > 0) {
+            rolesToHave.push(ownerRole.id);
+        } else {
+            rolesToRemove.push(ownerRole.id);
+        }
+
+        if (managedCount > 0) {
+            rolesToHave.push(adminRole.id);
+        } else {
+            rolesToRemove.push(adminRole.id);
+        }
+
+        // If no responsibility, must be CUSTOMER. If has responsibility, remove CUSTOMER.
+        if (ownedCount === 0 && managedCount === 0) {
+            rolesToHave.push(customerRole.id);
+        } else {
+            rolesToRemove.push(customerRole.id);
+        }
+
+        // Apply changes
+        for (const roleId of rolesToHave) {
+            await prisma.userRole.upsert({
+                where: { userId_roleId: { userId, roleId } },
+                update: {},
+                create: { userId, roleId }
+            });
+        }
+
+        if (rolesToRemove.length > 0) {
+            await prisma.userRole.deleteMany({
+                where: {
+                    userId,
+                    roleId: { in: rolesToRemove }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error syncing user restaurant role:', error);
+    }
+}
 
 // Create restaurant
 exports.createRestaurant = async (req, res) => {
@@ -138,6 +195,12 @@ exports.createRestaurant = async (req, res) => {
             }
         });
 
+        // Sync user roles
+        await Promise.all([
+            syncUserRestaurantRole(ownerId),
+            adminId ? syncUserRestaurantRole(adminId) : Promise.resolve()
+        ]);
+
         res.status(201).json({
             success: true,
             message: 'Restaurant created successfully',
@@ -159,6 +222,16 @@ exports.updateRestaurant = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
+        // Get current restaurant to check for owner change
+        const currentRestaurant = await prisma.restaurant.findUnique({
+            where: { id },
+            select: { ownerId: true, adminId: true }
+        });
+
+        if (!currentRestaurant) {
+            return res.status(404).json({ success: false, message: 'Restaurant not found' });
+        }
+
         const mappedData = {};
         if (updateData.nameAr) mappedData.nameAr = updateData.nameAr;
         if (updateData.nameEn) mappedData.nameEn = updateData.nameEn;
@@ -176,6 +249,29 @@ exports.updateRestaurant = async (req, res) => {
             where: { id },
             data: mappedData
         });
+
+        // Sync roles for all involved parties (old and new owners/admins)
+        const syncTasks = [];
+
+        if (mappedData.ownerId) {
+            syncTasks.push(syncUserRestaurantRole(mappedData.ownerId));
+            if (mappedData.ownerId !== currentRestaurant.ownerId) {
+                syncTasks.push(syncUserRestaurantRole(currentRestaurant.ownerId));
+            }
+        }
+
+        if (mappedData.adminId !== undefined) {
+            if (mappedData.adminId) {
+                syncTasks.push(syncUserRestaurantRole(mappedData.adminId));
+            }
+            if (currentRestaurant.adminId && mappedData.adminId !== currentRestaurant.adminId) {
+                syncTasks.push(syncUserRestaurantRole(currentRestaurant.adminId));
+            }
+        }
+
+        if (syncTasks.length > 0) {
+            await Promise.all(syncTasks);
+        }
 
         res.json({
             success: true,
@@ -197,9 +293,25 @@ exports.deleteRestaurant = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Get owner first
+        const restaurant = await prisma.restaurant.findUnique({
+            where: { id },
+            select: { ownerId: true, adminId: true }
+        });
+
+        if (!restaurant) {
+            return res.status(404).json({ success: false, message: 'Restaurant not found' });
+        }
+
         await prisma.restaurant.delete({
             where: { id }
         });
+
+        // Sync roles after deletion
+        await Promise.all([
+            syncUserRestaurantRole(restaurant.ownerId),
+            restaurant.adminId ? syncUserRestaurantRole(restaurant.adminId) : Promise.resolve()
+        ]);
 
         res.json({
             success: true,
